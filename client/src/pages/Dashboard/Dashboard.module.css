@@ -1,0 +1,76 @@
+.dashboard {
+  display: flex;
+  gap: 2rem;
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section {
+  flex: 1;
+  min-width: 0;
+}
+
+.section h2 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.cardContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15em, max-content));
+  grid-template-rows: repeat(auto-fit, minmax(5em, max-content));
+  grid-gap: 0.5rem;
+  grid-auto-flow: dense;
+}
+
+.emptyMessage {
+  color: #666;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
+  grid-column: 1 / -1;
+}
+
+/* Web görünümü: Yan yana */
+@media (min-width: 1201px) {
+  .dashboard {
+    flex-direction: row;
+    gap: 3rem;
+    padding: 2rem;
+  }
+}
+
+/* Orta boy ekranlar: Yan yana */
+@media (min-width: 1024px) and (max-width: 1200px) {
+  .dashboard {
+    flex-direction: row;
+    gap: 2rem;
+  }
+}
+
+/* Tablet: Dikey */
+@media (max-width: 1023px) {
+  .dashboard {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}
+
+/* Mobile: Single column */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 0.5rem;
+    gap: 1rem;
+  }
+  
+  .cardContainer {
+    grid-template-columns: 100%;
+  }
+  
+  .section h2 {
+    font-size: 1.25rem;
+  }
+}

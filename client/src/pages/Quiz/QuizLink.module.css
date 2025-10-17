@@ -1,0 +1,30 @@
+.quizLink {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none;
+  margin: 0.2em 0;
+}
+
+.quizLink:hover .deleteIcon {
+  opacity: 1;
+}
+
+@media (max-width: 1200px) {
+  .quizLink .deleteIcon {
+    opacity: 1;
+  }
+}
+
+.deleteIcon {
+  opacity: 0;
+  color: var(--color-red);
+  height: 1em;
+  cursor: pointer;
+}
+
+.link {
+  width: 100%;
+  cursor: pointer;
+}

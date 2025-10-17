@@ -1,0 +1,55 @@
+.flashcardContainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15em, max-content));
+  grid-template-rows: repeat(auto-fit, minmax(10em, max-content));
+  grid-gap: 0.25em;
+  grid-auto-flow: dense;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap-reverse;
+  max-width: 100vw;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.2em;
+}
+
+/* Web görünümü: Çok sütunlu grid */
+@media (min-width: 1201px) {
+  .flashcardContainer {
+    grid-template-columns: repeat(auto-fit, minmax(18em, max-content));
+    grid-template-rows: repeat(auto-fit, minmax(12em, max-content));
+    grid-gap: 1rem;
+  }
+}
+
+/* Orta boy ekranlar: İki sütunlu */
+@media (min-width: 1024px) and (max-width: 1200px) {
+  .flashcardContainer {
+    grid-template-columns: repeat(auto-fit, minmax(16em, max-content));
+    grid-template-rows: repeat(auto-fit, minmax(10em, max-content));
+    grid-gap: 0.75rem;
+  }
+}
+
+/* Tablet ve mobil: Tek sütun */
+@media (max-width: 1023px) {
+  .flashcardContainer {
+    grid-template-columns: 100%;
+    grid-template-rows: repeat(auto-fit, minmax(7.5em, max-content));
+  }
+  .title {
+    margin-bottom: 0.33em;
+  }
+  .menu {
+    flex-direction: column;
+    align-items: flex-end;
+    margin-bottom: 1.5em;
+  }
+}
