@@ -20,7 +20,6 @@
     "dev": "nodemon src/server.js",
     "migrate": "npx prisma migrate deploy",
     "generate": "npx prisma generate",
-    "db:push": "npx prisma db push",
-    "postinstall": "npx prisma generate && npx prisma migrate deploy"
+    "db:push": "npx prisma db push"
   }
 }
