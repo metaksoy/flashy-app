@@ -5,7 +5,7 @@ WORKDIR /app
 COPY ["package.json", "yarn.lock", "./"]
 RUN yarn install
 COPY . .
-RUN npx prisma generate
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 EXPOSE 8080
 
