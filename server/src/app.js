@@ -1,5 +1,5 @@
 const { ApolloServer } = require("@apollo/server");
-const { expressMiddleware } = require("@apollo/server/express4");
+const { expressMiddleware } = require("@apollo/server-express");
 const { typeDefs } = require("./schema");
 const resolvers = require("./resolvers");
 const jwt = require("jsonwebtoken");
