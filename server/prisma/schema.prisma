@@ -1,6 +1,7 @@
 generator client {
   provider      = "prisma-client-js"
-  binaryTargets = ["native"]
+  // Alpine (musl) ve OpenSSL 3.0 için derlenmiş binary'yi açıkça belirtiyoruz
+  binaryTargets = ["linux-musl-openssl-3.0.x"] 
 }
 
 datasource db {

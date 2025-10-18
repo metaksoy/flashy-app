@@ -1,11 +1,12 @@
 # node:18 kullanın (kök package.json'da belirttiğiniz gibi)
 FROM node:18-alpine
 
-# Prisma için gerekli bağımlılıkları kur
-RUN apk add --no-cache openssl1.1-compat libc6-compat
-
 # Çalışma dizinini ayarla
 WORKDIR /app
+
+# Yetkilendirme için 'node' kullanıcısını ayarla (daha güvenli)
+RUN chown -R node:node .
+USER node
 
 # SADECE paket dosyalarını kopyala.
 # Build context'imiz '/server' olacağı için bu,
@@ -14,11 +15,8 @@ COPY package.json yarn.lock ./
 
 # Bağımlılıkları kur. 
 # --ignore-scripts: "schema.prisma not found" hatasını veren 'postinstall' script'ini atlar.
-RUN yarn install --ignore-scripts
-
-# Yetkilendirme için 'node' kullanıcısını ayarla (daha güvenli)
-RUN chown -R node:node .
-USER node
+# --frozen-lockfile: 'yarn.lock' dosyasını kullanarak hızlı ve tutarlı kurulum yapar.
+RUN yarn install --ignore-scripts --frozen-lockfile
 
 # Geri kalan tüm kodları kopyala (artık 'prisma/schema.prisma' da burada)
 COPY . .
