@@ -16,7 +16,7 @@ COPY package.json yarn.lock ./
 # Bağımlılıkları kur. 
 # --ignore-scripts: "schema.prisma not found" hatasını veren 'postinstall' script'ini atlar.
 # --frozen-lockfile: 'yarn.lock' dosyasını kullanarak hızlı ve tutarlı kurulum yapar.
-RUN yarn install --ignore-scripts --frozen-lockfile
+RUN yarn install --ignore-scripts
 
 # Geri kalan tüm kodları kopyala (artık 'prisma/schema.prisma' da burada)
 COPY . .
