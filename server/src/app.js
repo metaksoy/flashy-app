@@ -1,7 +1,10 @@
-const { ApolloServer } = require("apollo-server");
+const { ApolloServer } = require("@apollo/server");
+const { expressMiddleware } = require("@apollo/server/express4");
 const { typeDefs } = require("./schema");
 const resolvers = require("./resolvers");
 const jwt = require("jsonwebtoken");
+const express = require("express");
+const cors = require("cors");
 
 const port = process.env.PORT || 4000;
 
@@ -14,10 +17,36 @@ const whitelist = [
   "https://*.vercel.app",
 ];
 
-const app = new ApolloServer({
+const getUser = (token) => {
+  // verify user token
+  try {
+    const user = jwt.verify(token, process.env.TOKEN_SECRET);
+    return user;
+  } catch (err) {
+    return null;
+  }
+};
+
+const server = new ApolloServer({
   resolvers,
   typeDefs,
-  context: ({ req, res }) => {
+});
+
+const app = express();
+
+// CORS middleware
+app.use(cors({
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true);
+    }
+  },
+  credentials: true,
+}));
+
+// Apollo Server middleware
+app.use("/graphql", expressMiddleware(server, {
+  context: async ({ req, res }) => {
     // parse the cookies from header
     if (req.headers.cookie) {
       const cookies = req.headers.cookie
@@ -40,25 +69,6 @@ const app = new ApolloServer({
     // try to retrieve a user with the token
     return { req, res };
   },
-  cors: {
-    origin: function (origin, callback) {
-      if (whitelist.indexOf(origin) !== -1) {
-        callback(null, true);
-      }
-    },
-    credentials: true, // <-- REQUIRED backend setting
-  },
-  debug: true,
-});
-
-const getUser = (token) => {
-  // verify user token
-  try {
-    const user = jwt.verify(token, process.env.TOKEN_SECRET);
-    return user;
-  } catch (err) {
-    return null;
-  }
-};
+}));
 
 module.exports = app;

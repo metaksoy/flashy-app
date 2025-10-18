@@ -6,17 +6,21 @@
   "license": "MIT",
   "dependencies": {
     "@prisma/client": "3.5.0",
-    "apollo-server": "^3.5.0",
-    "apollo-server-express": "^3.5.0",
+    "@apollo/server": "^4.10.4",
+    "@as-integrations/express": "^2.1.0",
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
-    "graphql": "^16.0.1",
+    "graphql": "^15.8.0",
     "jsonwebtoken": "^8.5.1",
     "nodemon": "^2.0.15",
     "prisma": "3.5.0"
   },
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "migrate": "npx prisma migrate deploy",
+    "generate": "npx prisma generate",
+    "db:push": "npx prisma db push"
   }
 }
