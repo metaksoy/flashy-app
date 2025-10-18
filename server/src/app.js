@@ -10,6 +10,8 @@ const whitelist = [
   "http://localhost",
   "http://localhost:3000",
   "https://studio.apollographql.com",
+  "https://*.railway.app",
+  "https://*.vercel.app",
 ];
 
 const app = new ApolloServer({

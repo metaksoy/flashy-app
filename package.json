@@ -1,0 +1,21 @@
+{
+  "name": "flashy-app",
+  "version": "1.0.0",
+  "description": "Flashcard application with React frontend and Node.js backend",
+  "main": "server/src/server.js",
+  "scripts": {
+    "start": "cd server && npm start",
+    "build": "cd client && npm run build",
+    "build:server": "cd server && npm install",
+    "build:client": "cd client && npm install && npm run build",
+    "install-all": "cd server && npm install && cd ../client && npm install",
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
+    "postinstall": "npm run install-all"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
