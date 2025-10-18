@@ -1,6 +1,9 @@
 # node:18 kullanın (kök package.json'da belirttiğiniz gibi)
 FROM node:18-alpine
 
+# Prisma için gerekli bağımlılıkları kur
+RUN apk add --no-cache openssl1.1-compat libc6-compat
+
 # Çalışma dizinini ayarla
 WORKDIR /app
 
