@@ -14,7 +14,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const httpLink = createHttpLink({
-  uri: process.env.REACT_APP_BACKEND_URL,
+  uri: process.env.REACT_APP_API_URL || "http://localhost:4000/graphql",
   credentials: "include",
 });
 
