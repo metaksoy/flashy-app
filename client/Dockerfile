@@ -12,19 +12,22 @@ RUN yarn run build
 
 FROM nginx:stable-alpine
 # Nginx'in $PORT değişkenini okuyabilmesi için 'envsubst' aracını kur
-RUN apk add --no-cache gettext
+RUN apk add --no-cache gettext bash
 
 # React build dosyalarını kopyala
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Nginx şablon dosyasını kopyala
-# (NOT: .conf değil, .conf.template kopyalanıyor)
 COPY nginx/nginx.conf.template /etc/nginx/nginx.conf.template
 
+# Railway PORT değişkenini varsayılan olarak 80 yap
+ENV PORT=8080
+
 # Nginx'in dinamik PORT'u dinlediğini belirt
-EXPOSE ${PORT}
+EXPOSE $PORT
 
 # Başlangıç komutu:
-# 1. envsubst ile ${PORT} değişkenini şablona bas ve gerçek bir .conf dosyası oluştur
-# 2. Nginx'i başlat
-CMD sh -c 'envsubst < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && nginx -g "daemon off;"'
+# 1. Railway'nin PORT değişkenini kullan (varsayılan 80)
+# 2. envsubst ile ${PORT} değişkenini şablona bas
+# 3. Nginx'i başlat
+CMD sh -c 'envsubst "\$PORT" < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && cat /etc/nginx/conf.d/default.conf && nginx -g "daemon off;"'

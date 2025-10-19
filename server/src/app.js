@@ -12,6 +12,7 @@ const whitelist = [
   process.env.FRONTEND_URL,
   "http://localhost",
   "http://localhost:3000",
+  "https://learnlangwithmet.up.railway.app",
   "https://studio.apollographql.com",
   "https://*.railway.app",
   "https://*.vercel.app",

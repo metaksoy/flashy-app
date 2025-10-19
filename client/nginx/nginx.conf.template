@@ -7,12 +7,13 @@ server {
     index index.html;
 
     location / {
-        # Bu, React Router'ın (SPA) /signin gibi sayfalarda
-        # yenilendiğinde 404 hatası vermesini engeller.
+        # React Router (SPA) için:
+        # /signin gibi bir adrese gelen isteği 404 yapma,
+        # bunun yerine /index.html dosyasını (React) sun.
         try_files $uri $uri/ /index.html;
     }
 
-    # Gzip ayarları (opsiyonel ama önerilir)
+    # Gzip ayarları (performans için önerilir)
     gzip on;
     gzip_vary on;
     gzip_proxied any;
