@@ -23,8 +23,12 @@ COPY . .
 
 # Artık dosyalar kopyalandığına göre Prisma komutlarını GÜVENLE çalıştır
 # '/server' context'inde olduğumuz için yolu './prisma/schema.prisma' olarak bulur
-RUN npx prisma generate
+# ...
+# Artık dosyalar kopyalandığına göre Prisma komutlarını GÜVENLE çalıştır
+# '/server' context'inde olduğumuz için yolu './prisma/schema.prisma' olarak bulur
+RUN echo "Cache buster" && npx prisma generate
 RUN npx prisma migrate deploy
+# ...
 
 # docker-compose dosyanızda 4000 portunu kullandığınızı belirttiniz.
 ENV PORT=4000
