@@ -18,6 +18,7 @@ const httpLink = createHttpLink({
   credentials: "include",
 });
 
+// ...
 const errorLink = onError(({ graphQLErrors, networkError, response }) => {
   if (graphQLErrors)
     graphQLErrors.forEach(({ message, locations, path }) =>
@@ -27,8 +28,13 @@ const errorLink = onError(({ graphQLErrors, networkError, response }) => {
     );
 
   if (networkError) console.log(`[Network error]: ${networkError}`);
-  response.errors = null;
+
+  // 'response' nesnesinin var olup olmadığını kontrol et
+  if (response) {
+    response.errors = null;
+  }
 });
+// ...
 
 const client = new ApolloClient({
   link: from([errorLink, httpLink]),
