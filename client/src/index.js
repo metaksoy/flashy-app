@@ -7,37 +7,17 @@ import {
   InMemoryCache,
   ApolloProvider,
   createHttpLink,
-  from,
 } from "@apollo/client";
-import { onError } from "@apollo/client/link/error";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const httpLink = createHttpLink({
-  uri: process.env.REACT_APP_API_URL ,
+  uri: process.env.REACT_APP_API_URL || "http://localhost:4000/graphql",
   credentials: "include",
 });
 
-// ...
-const errorLink = onError(({ graphQLErrors, networkError, response }) => {
-  if (graphQLErrors)
-    graphQLErrors.forEach(({ message, locations, path }) =>
-      console.log(
-        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-      )
-    );
-
-  if (networkError) console.log(`[Network error]: ${networkError}`);
-
-  // 'response' nesnesinin var olup olmadığını kontrol et
-  if (response) {
-    response.errors = null;
-  }
-});
-// ...
-
 const client = new ApolloClient({
-  link: from([errorLink, httpLink]),
+  link: httpLink,
   cache: new InMemoryCache(),
 });
 
