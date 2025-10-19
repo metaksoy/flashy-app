@@ -18,16 +18,26 @@ RUN apk add --no-cache gettext bash
 COPY --from=build /app/build /usr/share/nginx/html
 
 # Nginx şablon dosyasını kopyala
+# ... (Dockerfile'ın üst kısmı aynı)
+
+# Nginx şablon dosyasını kopyala
 COPY nginx/nginx.conf.template /etc/nginx/nginx.conf.template
 
-# Railway PORT değişkenini varsayılan olarak 80 yap
-ENV PORT=8080
+# --- BU SATIRI SİLİN ---
+# ENV PORT=8080 <--- BU SATIRI TAMAMEN SİLİN
 
 # Nginx'in dinamik PORT'u dinlediğini belirt
-EXPOSE $PORT
+EXPOSE ${PORT}
 
+# --- BU CMD SATIRINI AŞAĞIDAKİ İLE DEĞİŞTİRİN ---
 # Başlangıç komutu:
-# 1. Railway'nin PORT değişkenini kullan (varsayılan 80)
-# 2. envsubst ile ${PORT} değişkenini şablona bas
-# 3. Nginx'i başlat
-CMD sh -c 'envsubst "\$PORT" < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && cat /etc/nginx/conf.d/default.conf && nginx -g "daemon off;"'
+# 1. PORT değişkeni ayarlı değilse 8080 olarak ayarla (fallback)
+# 2. envsubst ile ${PORT} değişkenini şablona bas ve gerçek bir .conf dosyası oluştur
+# 3. Hata ayıklama için oluşturulan konfigürasyonu log'lara yazdır
+# 4. Nginx'i başlat
+CMD sh -c 'export PORT=${PORT:-8080} && \
+           envsubst "\$PORT" < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && \
+           echo "--- Generated Nginx Config ---" && \
+           cat /etc/nginx/conf.d/default.conf && \
+           echo "------------------------------" && \
+           nginx -g "daemon off;"'
