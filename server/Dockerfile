@@ -1,6 +1,9 @@
 # Debian tabanlı Node.js kullan (Alpine yerine - Prisma ile daha uyumlu)
 FROM node:18-slim
 
+# Prisma için gerekli OpenSSL kütüphanesini kur
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 # Çalışma dizinini ayarla
 WORKDIR /app
 
