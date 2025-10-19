@@ -35,14 +35,33 @@ const server = new ApolloServer({
 const app = express();
 
 // CORS middleware
-app.use(cors({
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-    }
-  },
-  credentials: true,
-}));
+// 
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // origin yoksa (örn: Postman, sunucu içi istek) izin ver
+      if (!origin) return callback(null, true);
+
+      // Whitelist'teki tam eşleşmeleri kontrol et
+      if (whitelist.indexOf(origin) !== -1) {
+        return callback(null, true);
+      }
+
+      // Wildcard (*.vercel.app) kontrolü
+      const allowedDomains = [".railway.app", ".vercel.app"];
+      const originHostname = new URL(origin).hostname;
+
+      if (allowedDomains.some((domain) => originHostname.endsWith(domain))) {
+        return callback(null, true);
+      }
+
+      // Eğer origin hiçbir şeye uymuyorsa reddet
+      callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 
 // Apollo Server middleware
 app.use("/graphql", expressMiddleware(server, {
