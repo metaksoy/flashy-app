@@ -1,7 +1,7 @@
 generator client {
   provider      = "prisma-client-js"
   // Alpine (musl) ve OpenSSL 3.0 için derlenmiş binary'yi açıkça belirtiyoruz
-  binaryTargets = ["linux-musl-openssl-3.0.x"] 
+  binaryTargets = ["linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -13,7 +13,7 @@ model Deck {
   id         String      @id @default(uuid()) @db.Uuid
   userId     String?     @map("user_id") @db.Uuid
   name       String?     @default("")
-  createdAt  DateTime?   @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdAt  DateTime?   @default(now()) @map("created_at") @db.Timestamp(6)
   user       User?       @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   flashcards Flashcard[]
 
@@ -65,11 +65,11 @@ model Quiz {
 }
 
 model QuizWord {
-  id       String  @id @default(uuid()) @db.Uuid
-  quizId   String? @map("quiz_id") @db.Uuid
-  word     String? @default("")
+  id         String  @id @default(uuid()) @db.Uuid
+  quizId     String? @map("quiz_id") @db.Uuid
+  word       String? @default("")
   definition String? @default("")
-  quiz     Quiz?   @relation(fields: [quizId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  quiz       Quiz?   @relation(fields: [quizId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@map("quiz_words")
 }
