@@ -30,5 +30,7 @@ RUN npx prisma migrate deploy
 ENV PORT=4000
 EXPOSE 4000
 
+#ekle
+
 # Uygulamayı başlat
 CMD ["node", "src/server.js"]
