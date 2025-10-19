@@ -102,6 +102,18 @@ const resolvers = {
   Mutation: {
     createUser: async (parent, { email, password }, context, info) => {
       const { res } = context;
+      
+      // Check if user already exists
+      const existingUser = await prisma.user.findUnique({
+        where: { email: email },
+      });
+      
+      if (existingUser) {
+        throw new GraphQLError("Bu email adresi zaten kullanılıyor", {
+          extensions: { code: "EMAIL_ALREADY_EXISTS" },
+        });
+      }
+      
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = await prisma.user.create({
         data: {

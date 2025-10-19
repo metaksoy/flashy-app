@@ -40,11 +40,11 @@ model Flashcard {
 
 model User {
   id         String      @id @default(uuid()) @db.Uuid
-  password   String?     @default("")
+  password   String      @default("")
   avatar     String?     @default("")
   name       String?     @default("")
-  email      String?     @default("")
-  createdAt  DateTime?   @default(now()) @map("created_at") @db.Timestamptz(6)
+  email      String      @unique
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
   decks      Deck[]
   flashcards Flashcard[]
   quizzes    Quiz[]
