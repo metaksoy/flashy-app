@@ -20,11 +20,11 @@ COPY . .
 # Prisma cache'ini temizle ve generate et
 RUN rm -rf node_modules/.prisma node_modules/@prisma/client
 RUN npx prisma generate
-RUN npx prisma migrate deploy
+#RUN npx prisma migrate deploy
 
 # Port ayarla
 ENV PORT=4000
 EXPOSE 4000
 
 # Uygulamayı başlat
-CMD ["node", "src/server.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node src/server.js"]
