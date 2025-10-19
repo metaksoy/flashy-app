@@ -1,44 +1,26 @@
-# node:18 kullanın (kök package.json'da belirttiğiniz gibi)
-FROM node:18-alpine
+# Debian tabanlı Node.js kullan (Alpine yerine - Prisma ile daha uyumlu)
+FROM node:18-slim
 
 # Çalışma dizinini ayarla
 WORKDIR /app
 
-# Yetkilendirme için 'node' kullanıcısını ayarla (daha güvenli)
-RUN chown -R node:node .
-USER node
-
-# SADECE paket dosyalarını kopyala.
-# Build context'imiz '/server' olacağı için bu,
-# 'server/package.json' ve 'server/yarn.lock' dosyalarını kopyalar.
+# SADECE paket dosyalarını kopyala
 COPY package.json yarn.lock ./
 
-# Bağımlılıkları kur. 
-# --ignore-scripts: "schema.prisma not found" hatasını veren 'postinstall' script'ini atlar.
-# --frozen-lockfile: 'yarn.lock' dosyasını kullanarak hızlı ve tutarlı kurulum yapar.
-RUN yarn install --ignore-scripts --frozen-lockfile
+# Bağımlılıkları kur (root olarak)
+# --ignore-scripts: "schema.prisma not found" hatasını veren 'postinstall' script'ini atlar
+RUN yarn install --ignore-scripts
 
 # Geri kalan tüm kodları kopyala (artık 'prisma/schema.prisma' da burada)
-# ...
 COPY . .
 
-# --- DEBUG BAŞLANGIÇ ---
-# Railway'in 'schema.prisma' içinde ne gördüğünü log'lara yazdır
-RUN echo "DEBUG: schema.prisma dosyasının içeriği:" && cat ./prisma/schema.prisma
-# --- DEBUG BİTİŞ ---
-
-# Artık dosyalar kopyalandığına göre Prisma komutlarını GÜVENLE çalıştır
-# '/server' context'inde olduğumuz için yolu './prisma/schema.prisma' olarak bulur
-RUN echo "Cache buster" && npx prisma generate
+# Prisma komutlarını çalıştır
+RUN npx prisma generate
 RUN npx prisma migrate deploy
-# ...
-# ...
 
-# docker-compose dosyanızda 4000 portunu kullandığınızı belirttiniz.
+# Port ayarla
 ENV PORT=4000
 EXPOSE 4000
-
-#ekle
 
 # Uygulamayı başlat
 CMD ["node", "src/server.js"]
