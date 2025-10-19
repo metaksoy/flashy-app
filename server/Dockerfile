@@ -17,7 +17,8 @@ RUN yarn install --ignore-scripts
 # Geri kalan tüm kodları kopyala (artık 'prisma/schema.prisma' da burada)
 COPY . .
 
-# Prisma komutlarını çalıştır
+# Prisma cache'ini temizle ve generate et
+RUN rm -rf node_modules/.prisma node_modules/@prisma/client
 RUN npx prisma generate
 RUN npx prisma migrate deploy
 
