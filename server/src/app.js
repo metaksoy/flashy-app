@@ -12,10 +12,12 @@ const whitelist = [
   process.env.FRONTEND_URL,
   "http://localhost",
   "http://localhost:3000",
+  "https://learnlangwithmet.up.railway.app",
+  "https://www.developermet.com",  // ← Yeni custom domain
+  "https://developermet.com",      // ← Root domain (opsiyonel)
   "https://studio.apollographql.com",
   "https://*.railway.app",
   "https://*.vercel.app",
-  "https://learnlangwithmet.up.railway.app" // <-- BU YENİ SATIRI EKLEYİN
 ];
 
 const getUser = (token) => {
