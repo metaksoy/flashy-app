@@ -35,8 +35,6 @@ const server = new ApolloServer({
 const app = express();
 
 // CORS middleware
-// 
-
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -63,31 +61,44 @@ app.use(
   })
 );
 
-// Apollo Server middleware
-app.use("/graphql", expressMiddleware(server, {
-  context: async ({ req, res }) => {
-    // parse the cookies from header
-    if (req.headers.cookie) {
-      const cookies = req.headers.cookie
-        .split("; ")
-        .reduce((allCookies, cookie) => {
-          const [key, value] = cookie.split("=");
-          allCookies[key] = value;
-          return allCookies;
-        }, {});
-      // get the user token from the cookies.
-      const token = cookies.token;
-      if (token) {
-        const user = getUser(token);
-        if (user) {
-          // add the user to the context
-          return { req, res, userId: user.userId };
+// Apollo Server'ı başlat ve middleware'i kur
+async function startApolloServer() {
+  await server.start();
+  
+  // Body parser middleware
+  app.use(express.json());
+  
+  // Apollo Server middleware
+  app.use("/graphql", expressMiddleware(server, {
+    context: async ({ req, res }) => {
+      // parse the cookies from header
+      if (req.headers.cookie) {
+        const cookies = req.headers.cookie
+          .split("; ")
+          .reduce((allCookies, cookie) => {
+            const [key, value] = cookie.split("=");
+            allCookies[key] = value;
+            return allCookies;
+          }, {});
+        // get the user token from the cookies.
+        const token = cookies.token;
+        if (token) {
+          const user = getUser(token);
+          if (user) {
+            // add the user to the context
+            return { req, res, userId: user.userId };
+          }
         }
       }
-    }
-    // try to retrieve a user with the token
-    return { req, res };
-  },
-}));
+      // try to retrieve a user with the token
+      return { req, res };
+    },
+  }));
+}
+
+// Apollo Server'ı başlat
+startApolloServer().catch((err) => {
+  console.error("Apollo Server başlatma hatası:", err);
+});
 
 module.exports = app;

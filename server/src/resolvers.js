@@ -1,7 +1,7 @@
 const { prisma } = require("./db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { AuthenticationError } = require("apollo-server");
+const { GraphQLError } = require("graphql");
 
 const resolvers = {
   Query: {
@@ -13,7 +13,7 @@ const resolvers = {
       return !!context.userId;
     },
     user: (parent, args, context) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       return prisma.user.findFirst({
         where: {
           id: context.userId,
@@ -26,7 +26,7 @@ const resolvers = {
       });
     },
     deck: (parent, args, context) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       return prisma.deck.findFirst({
         where: {
           id: args.id,
@@ -43,7 +43,7 @@ const resolvers = {
       });
     },
     newFlashcards: (parent, args, context) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       return prisma.flashcard.findMany({
         where: {
           userId: context.userId,
@@ -52,7 +52,7 @@ const resolvers = {
       });
     },
     dueFlashcards: (parent, args, context) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       return prisma.flashcard.findMany({
         where: {
           userId: context.userId,
@@ -64,7 +64,7 @@ const resolvers = {
       });
     },
     newFromDeck: (parent, args, context) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       return prisma.flashcard.findMany({
         where: {
           deckId: args.deckId,
@@ -74,7 +74,7 @@ const resolvers = {
       });
     },
     dueFromDeck: (parent, args, context) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       return prisma.flashcard.findMany({
         where: {
           deckId: args.deckId,
@@ -87,7 +87,7 @@ const resolvers = {
       });
     },
     quiz: (parent, args, context) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       return prisma.quiz.findFirst({
         where: {
           id: args.id,
@@ -153,7 +153,7 @@ const resolvers = {
       return userWithToken.token;
     },
     createDeck: async (parent, { name }, context, info) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       const deck = await prisma.deck.create({
         data: {
           name,
@@ -163,7 +163,7 @@ const resolvers = {
       return deck;
     },
     createFlashcard: async (parent, { data }, context, info) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       const flashcard = await prisma.flashcard.create({
         data: {
           ...data,
@@ -173,7 +173,7 @@ const resolvers = {
       return flashcard;
     },
     updateFlashcard: async (parent, { data }, context, info) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       const flashcard = await prisma.flashcard.update({
         where: { id: data.id },
         data: {
@@ -190,14 +190,14 @@ const resolvers = {
       return flashcard;
     },
     deleteFlashcard: async (parent, { id }, context, info) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       const flashcard = await prisma.flashcard.delete({
         where: { id },
       });
       return flashcard;
     },
     deleteDeck: async (parent, { id }, context, info) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       // delete all flashcards in the deck first
       await prisma.flashcard.deleteMany({
         where: {
@@ -211,7 +211,7 @@ const resolvers = {
       return deck;
     },
     createQuiz: async (parent, { name }, context, info) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       const quiz = await prisma.quiz.create({
         data: {
           name: name,
@@ -224,7 +224,7 @@ const resolvers = {
       return quiz;
     },
     deleteQuiz: async (parent, { id }, context, info) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       // delete all quiz words first
       await prisma.quizWord.deleteMany({
         where: {
@@ -238,7 +238,7 @@ const resolvers = {
       return quiz;
     },
     createQuizWord: async (parent, { data }, context, info) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       const quizWord = await prisma.quizWord.create({
         data: {
           word: data.word,
@@ -249,7 +249,7 @@ const resolvers = {
       return quizWord;
     },
     deleteQuizWord: async (parent, { id }, context, info) => {
-      if (!context.userId) return new AuthenticationError("Not authenticated");
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       const quizWord = await prisma.quizWord.delete({
         where: { id },
       });
