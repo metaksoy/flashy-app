@@ -1,3 +1,10 @@
 # https://www.robotstxt.org/robotstxt.html
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://www.developermet.com/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
