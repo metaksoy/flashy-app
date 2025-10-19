@@ -19,15 +19,19 @@ COPY package.json yarn.lock ./
 RUN yarn install --ignore-scripts --frozen-lockfile
 
 # Geri kalan tüm kodları kopyala (artık 'prisma/schema.prisma' da burada)
+# ...
 COPY . .
 
-# Artık dosyalar kopyalandığına göre Prisma komutlarını GÜVENLE çalıştır
-# '/server' context'inde olduğumuz için yolu './prisma/schema.prisma' olarak bulur
-# ...
+# --- DEBUG BAŞLANGIÇ ---
+# Railway'in 'schema.prisma' içinde ne gördüğünü log'lara yazdır
+RUN echo "DEBUG: schema.prisma dosyasının içeriği:" && cat ./prisma/schema.prisma
+# --- DEBUG BİTİŞ ---
+
 # Artık dosyalar kopyalandığına göre Prisma komutlarını GÜVENLE çalıştır
 # '/server' context'inde olduğumuz için yolu './prisma/schema.prisma' olarak bulur
 RUN echo "Cache buster" && npx prisma generate
 RUN npx prisma migrate deploy
+# ...
 # ...
 
 # docker-compose dosyanızda 4000 portunu kullandığınızı belirttiniz.
