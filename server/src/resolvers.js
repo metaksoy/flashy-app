@@ -6,19 +6,41 @@ const { GraphQLError } = require("graphql");
 // Cookie options helper - Signin ve Logout'ta aynı ayarlar kullanılmalı
 const getCookieOptions = () => {
   const isProduction = process.env.NODE_ENV === "production";
-  return {
+  const options = {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "none" : "lax",
     path: "/",
   };
+  
+  // Production'da domain belirtme (cross-domain için gerekli olabilir)
+  // Railway veya custom domain kullanıyorsanız, domain'i belirtmeyin
+  // Browser otomatik olarak doğru domain'i kullanacak
+  
+  return options;
 };
 
 const resolvers = {
   Query: {
     logout: (parent, args, context) => {
-      // Cookie options ile clear et (yoksa silinmez!)
-      context.res.clearCookie("token", getCookieOptions());
+      // Cookie'yi sil - Production'da da çalışması için tüm ayarlar aynı olmalı
+      const cookieOptions = getCookieOptions();
+      
+      console.log("🔴 Logout called - Cookie options:", cookieOptions);
+      console.log("🔴 Current cookies:", context.req.headers.cookie);
+      
+      // MaxAge'i 0 yap ve geçmiş tarih ver
+      context.res.cookie("token", "", {
+        ...cookieOptions,
+        maxAge: 0,
+        expires: new Date(0),
+      });
+      
+      // Ayrıca clearCookie de çağır
+      context.res.clearCookie("token", cookieOptions);
+      
+      console.log("✅ Logout completed - Cookie should be cleared");
+      
       return true;
     },
     isAuthenticated: (parent, args, context) => {

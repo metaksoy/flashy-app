@@ -14,17 +14,21 @@ export const useLogout = () => {
             logout
           }
         `,
+        fetchPolicy: "no-cache", // Cache'i bypass et
       });
       
       // 2. Apollo cache'i tamamen temizle
       await client.clearStore();
       
-      // 3. Login sayfasına yönlendir
-      navigate("/signin", { replace: true });
+      // 3. Tam sayfa yenileme ile login sayfasına git (en garantili yöntem)
+      window.location.href = "/signin";
     } catch (error) {
       // Hata olsa bile cache'i temizle ve çıkış yap
+      console.error("Logout error:", error);
       await client.clearStore();
-      navigate("/signin", { replace: true });
+      
+      // Tam sayfa yenileme ile çık
+      window.location.href = "/signin";
     }
   };
   
