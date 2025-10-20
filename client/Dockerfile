@@ -2,11 +2,6 @@
 FROM node:16.13.0-alpine as build
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
-
-# Build-time environment variables
-ARG REACT_APP_API_URL
-ENV REACT_APP_API_URL=$REACT_APP_API_URL
-
 COPY package.json ./
 COPY yarn.lock ./
 RUN apk add --no-cache python3 make g++ && yarn install
@@ -41,8 +36,7 @@ EXPOSE ${PORT}
 # 3. Hata ayıklama için oluşturulan konfigürasyonu log'lara yazdır
 # 4. Nginx'i başlat
 CMD sh -c 'export PORT=${PORT:-8080} && \
-           export BACKEND_URL=${BACKEND_URL:-http://localhost:4000/graphql} && \
-           envsubst "\$PORT \$BACKEND_URL" < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && \
+           envsubst "\$PORT" < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && \
            echo "--- Generated Nginx Config ---" && \
            cat /etc/nginx/conf.d/default.conf && \
            echo "------------------------------" && \
