@@ -12,8 +12,11 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const httpLink = createHttpLink({
-  uri: process.env.REACT_APP_API_URL || "http://localhost:4000/graphql",
-  credentials: "include",
+  // Production'da nginx proxy kullan (same-origin), development'ta direkt backend'e git
+  uri: process.env.NODE_ENV === "production" 
+    ? "/graphql"  // Nginx proxy üzerinden (same-origin, Safari cookie sorunu yok!)
+    : (process.env.REACT_APP_API_URL || "http://localhost:4000/graphql"),
+  credentials: "include", // Cookie'leri her zaman gönder
 });
 
 const client = new ApolloClient({

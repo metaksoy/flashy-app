@@ -41,7 +41,8 @@ EXPOSE ${PORT}
 # 3. Hata ayıklama için oluşturulan konfigürasyonu log'lara yazdır
 # 4. Nginx'i başlat
 CMD sh -c 'export PORT=${PORT:-8080} && \
-           envsubst "\$PORT" < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && \
+           export BACKEND_URL=${BACKEND_URL:-http://localhost:4000/graphql} && \
+           envsubst "\$PORT \$BACKEND_URL" < /etc/nginx/nginx.conf.template > /etc/nginx/conf.d/default.conf && \
            echo "--- Generated Nginx Config ---" && \
            cat /etc/nginx/conf.d/default.conf && \
            echo "------------------------------" && \

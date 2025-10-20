@@ -7,15 +7,11 @@ const { GraphQLError } = require("graphql");
 const getCookieOptions = () => {
   const isProduction = process.env.NODE_ENV === "production";
   const options = {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    httpOnly: true,          // XSS saldırılarına karşı koruma
+    secure: isProduction,    // Production'da HTTPS zorunlu
+    sameSite: "lax",         // CSRF koruması + Safari uyumluluğu (nginx proxy sayesinde same-origin)
     path: "/",
   };
-  
-  // Production'da domain belirtme (cross-domain için gerekli olabilir)
-  // Railway veya custom domain kullanıyorsanız, domain'i belirtmeyin
-  // Browser otomatik olarak doğru domain'i kullanacak
   
   return options;
 };

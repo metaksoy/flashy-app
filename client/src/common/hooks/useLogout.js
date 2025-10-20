@@ -17,18 +17,20 @@ export const useLogout = () => {
         fetchPolicy: "no-cache", // Cache'i bypass et
       });
       
+      console.log("✅ Logout successful - Cookie cleared by backend");
+      
       // 2. Apollo cache'i tamamen temizle
       await client.clearStore();
       
       // 3. Tam sayfa yenileme ile login sayfasına git (en garantili yöntem)
-      window.location.href = "/";
+      window.location.href = "/signin";
     } catch (error) {
-      // Hata olsa bile cache'i temizle ve çıkış yap
+      // Hata olsa bile temizle ve çıkış yap
       console.error("Logout error:", error);
       await client.clearStore();
       
       // Tam sayfa yenileme ile çık
-      window.location.href = "/";
+      window.location.href = "/signin";
     }
   };
   

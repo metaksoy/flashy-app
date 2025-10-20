@@ -20,7 +20,13 @@ export const useLogin = () => {
         if (data.data === null) {
           toast.error("Geçersiz email veya şifre");
         } else {
-          client.resetStore().then(() => navigate("/", { replace: true }));
+          console.log("✅ Login successful - Cookie set by backend");
+          
+          // Cache'i temizle ve yönlendir
+          client.resetStore().then(() => {
+            // Tam sayfa yenileme ile auth state'i güncelle
+            window.location.href = "/";
+          });
         }
       })
       .catch((error) => {
@@ -30,6 +36,7 @@ export const useLogin = () => {
         } else if (error.message?.includes("Wrong Password")) {
           toast.error("Şifreniz yanlış");
         } else {
+          console.error("Login error:", error);
           toast.error("Giriş yapılırken bir hata oluştu");
         }
       });
