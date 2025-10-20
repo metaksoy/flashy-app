@@ -21,14 +21,14 @@ export const useLogout = () => {
       await client.clearStore();
       
       // 3. Tam sayfa yenileme ile login sayfasına git (en garantili yöntem)
-      window.location.href = "/signin";
+      window.location.href = "/";
     } catch (error) {
       // Hata olsa bile cache'i temizle ve çıkış yap
       console.error("Logout error:", error);
       await client.clearStore();
       
       // Tam sayfa yenileme ile çık
-      window.location.href = "/signin";
+      window.location.href = "/";
     }
   };
   
