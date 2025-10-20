@@ -17,7 +17,7 @@ const Landing = () => {
         <div className={styles.column1}>
           <img src={logo} alt="Flashy logo"></img>
           <p>
-            Flashy is an easy to use, open source spaced repetition system that
+            It is an easy to use, spaced repetition system that 
             you have been waiting for!
           </p>
           {/* <p>The future of flashcards has been redesigned.</p> */}
