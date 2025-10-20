@@ -3,10 +3,22 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { GraphQLError } = require("graphql");
 
+// Cookie options helper - Signin ve Logout'ta aynı ayarlar kullanılmalı
+const getCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === "production";
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    path: "/",
+  };
+};
+
 const resolvers = {
   Query: {
     logout: (parent, args, context) => {
-      context.res.clearCookie("token");
+      // Cookie options ile clear et (yoksa silinmez!)
+      context.res.clearCookie("token", getCookieOptions());
       return true;
     },
     isAuthenticated: (parent, args, context) => {
@@ -129,9 +141,7 @@ const resolvers = {
         }),
       };
       res.cookie("token", userWithToken.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        ...getCookieOptions(),
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
       return userWithToken.token;
@@ -157,9 +167,7 @@ const resolvers = {
         }),
       };
       res.cookie("token", userWithToken.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        ...getCookieOptions(),
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
       return userWithToken.token;
