@@ -7,19 +7,17 @@ import {
   InMemoryCache,
   ApolloProvider,
   createHttpLink,
-  from,
 } from "@apollo/client";
-import { onError } from "@apollo/client/link/error";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const httpLink = createHttpLink({
-  uri: process.env.REACT_APP_API_URL ,
+  uri: process.env.REACT_APP_API_URL || "http://localhost:4000/graphql",
   credentials: "include",
 });
 
 const client = new ApolloClient({
-  link: from([errorLink, httpLink]),
+  link: httpLink,
   cache: new InMemoryCache(),
 });
 

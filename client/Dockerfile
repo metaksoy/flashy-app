@@ -2,6 +2,11 @@
 FROM node:16.13.0-alpine as build
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
+
+# Build-time environment variables
+ARG REACT_APP_API_URL
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
 COPY package.json ./
 COPY yarn.lock ./
 RUN apk add --no-cache python3 make g++ && yarn install

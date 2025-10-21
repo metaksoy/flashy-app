@@ -1,8 +1,17 @@
+# Redirect Railway domain to custom domain
 server {
-    # Nginx'in $PORT değişkenini dinlemesini sağlar
     listen ${PORT};
+    server_name *.up.railway.app;
+    
+    # Permanent redirect to custom domain
+    return 301 https://www.developermet.com$request_uri;
+}
 
-    server_name _;
+# Main server - Custom domain
+server {
+    listen ${PORT};
+    server_name www.developermet.com developermet.com _;
+    
     root /usr/share/nginx/html;
     index index.html;
 
