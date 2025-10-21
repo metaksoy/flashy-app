@@ -13,8 +13,9 @@ const whitelist = [
   "http://localhost",
   "http://localhost:3000",
   "https://learnlangwithmet.up.railway.app",
-  "https://www.developermet.com",  // ← Yeni custom domain
-  "https://developermet.com",      // ← Root domain (opsiyonel)
+  "https://www.developermet.com",
+  "https://developermet.com",
+  "https://api.developermet.com",  // ← Backend custom domain
   "https://studio.apollographql.com",
   "https://*.railway.app",
   "https://*.vercel.app",
