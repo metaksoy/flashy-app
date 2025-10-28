@@ -341,14 +341,14 @@ const QuizDetail = () => {
   };
 
   const nextQuestion = () => {
-    // State'leri sıfırla
+    // Önce state'leri sıfırla
+    setShowAnswer(false);
+    setUserAnswer("");
     setIsAnswerCorrect(null);
     setSelectedOption(null);
     
     if (currentWordIndex < questionQueue.length - 1) {
       setCurrentWordIndex(currentWordIndex + 1);
-      setUserAnswer("");
-      setShowAnswer(false);
     } else {
       // İlk tur tamamlandı, yanlış cevapları kontrol et
       if (wrongAnswers.length > 0) {
@@ -364,8 +364,6 @@ const QuizDetail = () => {
         setQuestionQueue(newQueue);
         setWrongAnswers([]);
         setCurrentWordIndex(currentWordIndex + 1);
-        setUserAnswer("");
-        setShowAnswer(false);
         
         toast.info(`İlk tur tamamlandı! Şimdi yanlış yaptığınız ${wrongAnswers.length} kelimeyi tekrar ediyoruz...`);
       } else {
@@ -546,14 +544,14 @@ const QuizDetail = () => {
                 ) : (
                   <div className={styles.multipleChoice}>
                         <h4>Doğru cevabı seçin:</h4>
-                    <div className={styles.optionsGrid}>
-                      {(() => {
-                        console.log("Rendering multiple choice for word:", currentWord?.word);
-                        const options = generateMultipleChoiceOptions(currentWord?.word, quiz.words);
-                        console.log("Options to render:", options);
-                        return options.map((option, index) => (
-                          <button
-                            key={index}
+                        <div className={styles.optionsGrid}>
+                          {(() => {
+                            console.log("Rendering multiple choice for word:", currentWord?.word);
+                            const options = generateMultipleChoiceOptions(currentWord?.word, quiz.words);
+                            console.log("Options to render:", options);
+                            return options.map((option, index) => (
+                              <button
+                                key={`${currentWordIndex}-${option}-${index}`}
                                 className={`${styles.optionButton} ${
                                   selectedOption === option 
                                     ? isAnswerCorrect 
@@ -568,14 +566,18 @@ const QuizDetail = () => {
                                     checkAnswer(option);
                                   }
                                 }}
+                                onFocus={(e) => {
+                                  e.target.blur();
+                                }}
                                 disabled={showAnswer}
                                 type="button"
-                          >
-                            {option}
-                          </button>
-                        ));
-                      })()}
-                    </div>
+                                tabIndex={showAnswer ? -1 : 0}
+                              >
+                                {option}
+                              </button>
+                            ));
+                          })()}
+                        </div>
                   </div>
                 )}
               </div>

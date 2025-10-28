@@ -557,6 +557,17 @@
   -webkit-tap-highlight-color: transparent;
   user-select: none;
   -webkit-user-select: none;
+  outline: none;
+}
+
+.optionButton:focus {
+  outline: none;
+  border-color: #e9ecef;
+}
+
+.optionButton:focus:not(:disabled):not(.correctOption):not(.wrongOption) {
+  border-color: #e9ecef;
+  background: white;
 }
 
 .optionButton:hover:not(:disabled) {
