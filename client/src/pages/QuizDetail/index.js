@@ -1,6 +1,6 @@
 import { gql, useQuery, useMutation } from "@apollo/client";
 import { useParams } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import LoadingScreen from "../../common/components/LoadingScreen";
 import Button from "../../common/components/Button";
@@ -74,6 +74,30 @@ const QuizDetail = () => {
   const { data, loading, error } = useQuery(GET_QUIZ, {
     variables: { id },
   });
+
+  // Her soru değişiminde focus'u temizle
+  useEffect(() => {
+    if (quizStarted && !showAnswer) {
+      // Aktif elementi blur yap
+      if (document.activeElement && document.activeElement.blur) {
+        document.activeElement.blur();
+      }
+      // Tüm butonların focus'unu kaldır
+      const buttons = document.querySelectorAll('button[type="button"]');
+      buttons.forEach(btn => {
+        if (btn.blur) btn.blur();
+      });
+      // Quiz question div'ine focus yap
+      setTimeout(() => {
+        const quizQuestion = document.querySelector('[tabIndex="-1"]');
+        if (quizQuestion && quizQuestion.focus) {
+          quizQuestion.focus();
+          // Hemen blur yap ki hiçbir şey focuslu kalmasın
+          setTimeout(() => quizQuestion.blur(), 50);
+        }
+      }, 50);
+    }
+  }, [currentWordIndex, quizStarted, showAnswer]);
 
   const [createQuizWord] = useMutation(CREATE_QUIZ_WORD, {
     refetchQueries: [{ query: GET_QUIZ, variables: { id } }],
@@ -508,7 +532,7 @@ const QuizDetail = () => {
             )}
           </div>
           
-          <div className={styles.quizQuestion}>
+              <div className={styles.quizQuestion} tabIndex={-1}>
                 <h3>Bu tanımın karşılığı nedir?</h3>
                 <p className={styles.definition}>
                   <span className={styles.quoteIcon}>"</span>
@@ -544,13 +568,13 @@ const QuizDetail = () => {
                 ) : (
                   <div className={styles.multipleChoice}>
                         <h4>Doğru cevabı seçin:</h4>
-                        <div className={styles.optionsGrid}>
-                          {(() => {
-                            console.log("Rendering multiple choice for word:", currentWord?.word);
-                            const options = generateMultipleChoiceOptions(currentWord?.word, quiz.words);
-                            console.log("Options to render:", options);
-                            return options.map((option, index) => (
-                              <button
+                    <div className={styles.optionsGrid}>
+                      {(() => {
+                        console.log("Rendering multiple choice for word:", currentWord?.word);
+                        const options = generateMultipleChoiceOptions(currentWord?.word, quiz.words);
+                        console.log("Options to render:", options);
+                        return options.map((option, index) => (
+                          <button
                                 key={`${currentWordIndex}-${option}-${index}`}
                                 className={`${styles.optionButton} ${
                                   selectedOption === option 
@@ -565,19 +589,30 @@ const QuizDetail = () => {
                                   if (!showAnswer) {
                                     checkAnswer(option);
                                   }
+                                  // Tıklamadan sonra hemen blur yap
+                                  e.currentTarget.blur();
+                                }}
+                                onTouchStart={(e) => {
+                                  // Touch başladığında blur yap
+                                  e.currentTarget.blur();
                                 }}
                                 onFocus={(e) => {
+                                  e.preventDefault();
                                   e.target.blur();
+                                }}
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
                                 }}
                                 disabled={showAnswer}
                                 type="button"
-                                tabIndex={showAnswer ? -1 : 0}
-                              >
-                                {option}
-                              </button>
-                            ));
-                          })()}
-                        </div>
+                                tabIndex={-1}
+                                autoFocus={false}
+                          >
+                            {option}
+                          </button>
+                        ));
+                      })()}
+                    </div>
                   </div>
                 )}
               </div>
