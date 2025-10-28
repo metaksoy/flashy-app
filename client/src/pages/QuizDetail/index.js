@@ -332,9 +332,7 @@ const QuizDetail = () => {
     
     if (isCorrect) {
       setScore(prevScore => prevScore + 1);
-      toast.success("✅ Doğru cevap!");
     } else {
-      toast.error(`❌ Yanlış! Doğru cevap: ${currentWord.word}`);
       // Yanlış cevaplanan kelimeyi yanlış cevaplar listesine ekle
       setWrongAnswers(prev => [...prev, currentWord]);
     }
@@ -535,7 +533,6 @@ const QuizDetail = () => {
                                 checkAnswer();
                               }
                             }}
-                            autoFocus
                       />
                     </div>
                         <Button 
@@ -564,8 +561,15 @@ const QuizDetail = () => {
                                       : styles.wrongOption
                                     : ''
                                 }`}
-                            onClick={() => checkAnswer(option)}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  if (!showAnswer) {
+                                    checkAnswer(option);
+                                  }
+                                }}
                                 disabled={showAnswer}
+                                type="button"
                           >
                             {option}
                           </button>
@@ -583,6 +587,11 @@ const QuizDetail = () => {
                     <p className={styles.resultMessage}>
                       {isAnswerCorrect ? 'Harika! Doğru cevap!' : 'Yanlış cevap!'}
                     </p>
+                    {!isAnswerCorrect && selectedOption && (
+                      <p className={styles.userWrongAnswerDisplay}>
+                        Sizin cevabınız: <strong className={styles.wrongAnswerText}>{selectedOption}</strong>
+                      </p>
+                    )}
                 <p className={styles.correctAnswer}>
                       Doğru cevap: <strong>{currentWord?.word}</strong>
                     </p>

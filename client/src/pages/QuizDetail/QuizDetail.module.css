@@ -115,13 +115,15 @@
 }
 
 .quizModalContent {
-  padding: 2rem;
+  padding: 1.5rem;
   max-width: 800px;
   width: 100%;
-  height: 100%;
+  height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .quizModalContent h2 {
@@ -134,9 +136,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
   border-bottom: 2px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.quizHeader h2 {
+  font-size: 1.3rem;
+  margin: 0;
 }
 
 .closeQuizBtn {
@@ -144,14 +152,15 @@
   color: white;
   border: none;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 1.5rem;
+  width: 35px;
+  height: 35px;
+  font-size: 1.3rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .closeQuizBtn:hover {
@@ -162,11 +171,12 @@
 /* Progress Bar */
 .progressBarContainer {
   width: 100%;
-  height: 8px;
+  height: 6px;
   background: #e9ecef;
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
 }
 
 .progressBar {
@@ -178,11 +188,12 @@
 }
 
 .quizProgress {
-  margin-bottom: 2rem;
-  padding: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.75rem;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .progressInfo {
@@ -221,30 +232,34 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  overflow-y: auto;
+  padding: 0.5rem 0;
 }
 
 .quizQuestion h3 {
   color: #333;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.3rem;
+  flex-shrink: 0;
 }
 
 .definition {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   color: #495057;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
   background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%);
   border-radius: 12px;
   border-left: 5px solid #007bff;
   box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15);
-  line-height: 1.6;
+  line-height: 1.5;
   font-weight: 500;
   position: relative;
+  flex-shrink: 0;
 }
 
 .quoteIcon {
-  font-size: 2rem;
+  font-size: 1.5rem;
   color: #007bff;
   opacity: 0.3;
   font-family: Georgia, serif;
@@ -322,32 +337,51 @@
 }
 
 .resultIcon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
   animation: iconBounce 0.6s ease-out;
+  flex-shrink: 0;
 }
 
 @keyframes iconBounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+  50% { transform: translateY(-15px); }
 }
 
 .resultMessage {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   color: #333;
+  flex-shrink: 0;
+}
+
+.userWrongAnswerDisplay {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: linear-gradient(135deg, #fff3cd 0%, #ffe5a0 100%);
+  border-radius: 8px;
+  color: #856404;
+  border: 2px solid #ffc107;
+  flex-shrink: 0;
+}
+
+.wrongAnswerText {
+  color: #dc3545;
+  text-decoration: line-through;
 }
 
 .correctAnswer {
-  font-size: 1.2rem;
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
   background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
   border-radius: 12px;
   color: #155724;
   border: 2px solid #28a745;
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+  flex-shrink: 0;
 }
 
 /* Quiz Type Selection Styles */
@@ -519,6 +553,10 @@
   text-align: center;
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .optionButton:hover:not(:disabled) {
@@ -535,6 +573,7 @@
 .optionButton:disabled {
   cursor: not-allowed;
   opacity: 0.7;
+  pointer-events: none;
 }
 
 .correctOption {
@@ -707,9 +746,12 @@
 
 /* Results Screen Styles */
 .resultsScreen {
-  padding: 2rem;
+  padding: 1.5rem;
   text-align: center;
   animation: fadeIn 0.5s ease-out;
+  overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
 }
 
 @keyframes fadeIn {
@@ -889,6 +931,96 @@
   flex-wrap: wrap;
 }
 
+@media (max-width: 768px) {
+  .quizModalContent {
+    padding: 1rem;
+    height: 100vh;
+    height: -webkit-fill-available;
+  }
+  
+  .quizHeader {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .quizHeader h2 {
+    font-size: 1.1rem;
+  }
+  
+  .closeQuizBtn {
+    width: 30px;
+    height: 30px;
+    font-size: 1.1rem;
+  }
+  
+  .progressBarContainer {
+    margin-bottom: 0.5rem;
+  }
+  
+  .quizProgress {
+    margin-bottom: 0.75rem;
+    padding: 0.5rem;
+  }
+  
+  .progressInfo {
+    font-size: 0.9rem;
+  }
+  
+  .questionNumber {
+    font-size: 0.95rem;
+  }
+  
+  .score {
+    font-size: 1rem;
+  }
+  
+  .quizQuestion h3 {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .definition {
+    font-size: 1rem;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .quoteIcon {
+    font-size: 1.2rem;
+  }
+  
+  .resultIcon {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .resultMessage {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .userWrongAnswerDisplay {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .correctAnswer {
+    font-size: 1rem;
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .optionsGrid {
+    gap: 0.5rem;
+  }
+  
+  .optionButton {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+  }
+}
+
 @media (max-width: 480px) {
   .container {
     padding: 1rem;
@@ -899,7 +1031,7 @@
   }
   
   .quizModalContent {
-    padding: 1rem;
+    padding: 0.75rem;
   }
   
   .quizProgress {
@@ -957,5 +1089,22 @@
     font-size: 1rem;
     flex-direction: column;
     align-items: flex-start;
+  }
+  
+  .definition {
+    font-size: 0.95rem;
+    padding: 0.6rem;
+  }
+  
+  .quizQuestion h3 {
+    font-size: 1rem;
+  }
+  
+  .resultIcon {
+    font-size: 2rem;
+  }
+  
+  .resultMessage {
+    font-size: 1rem;
   }
 }
