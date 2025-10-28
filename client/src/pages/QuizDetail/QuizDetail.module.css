@@ -112,6 +112,43 @@
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
+  justify-content: center;
+}
+
+.modalActions button {
+  flex: 1;
+  max-width: 200px;
+}
+
+/* Confirmation Modal Styles */
+.confirmModalHeader {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.confirmIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: iconBounce 0.8s ease-out;
+}
+
+.confirmModalHeader h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.confirmMessage {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #ffc107;
 }
 
 .quizModalContent {
@@ -964,6 +1001,18 @@
 }
 
 @media (max-width: 768px) {
+  .modalContent {
+    padding: 1.5rem;
+  }
+  
+  .confirmModalHeader h2 {
+    font-size: 1.3rem;
+  }
+  
+  .confirmIcon {
+    font-size: 3.5rem;
+  }
+  
   .quizModalContent {
     padding: 1rem;
     height: 100vh;
@@ -1138,5 +1187,27 @@
   
   .resultMessage {
     font-size: 1rem;
+  }
+  
+  .confirmModalHeader h2 {
+    font-size: 1.2rem;
+  }
+  
+  .confirmIcon {
+    font-size: 3rem;
+  }
+  
+  .confirmMessage {
+    font-size: 0.95rem;
+    padding: 0.75rem;
+  }
+  
+  .modalActions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .modalActions button {
+    max-width: 100%;
   }
 }

@@ -24,13 +24,16 @@ const QuizDetail = () => {
   const [showBulkImportModal, setShowBulkImportModal] = useState(false);
   const [bulkText, setBulkText] = useState("");
   const [selectedQuestionCount, setSelectedQuestionCount] = useState(null); // Seçilen soru sayısı
+  const [showExitConfirmModal, setShowExitConfirmModal] = useState(false); // Quiz'den çıkış onayı
+  const [wordToDelete, setWordToDelete] = useState(null);
+  const [showDeleteWordModal, setShowDeleteWordModal] = useState(false);
   
   // Quiz karışık sorular ve yanlış cevaplar için yeni state'ler
   const [shuffledWords, setShuffledWords] = useState([]);
   const [wrongAnswers, setWrongAnswers] = useState([]);
   const [questionQueue, setQuestionQueue] = useState([]);
   const [totalQuestions, setTotalQuestions] = useState(0);
-
+  
   // Yeni interaktif özellikler için state'ler
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [answerHistory, setAnswerHistory] = useState([]);
@@ -146,8 +149,15 @@ const QuizDetail = () => {
   };
 
   const handleDeleteWord = (wordId) => {
-    if (window.confirm("Bu kelimeyi silmek istediğinizden emin misiniz?")) {
-      deleteQuizWord({ variables: { id: wordId } });
+    setWordToDelete(wordId);
+    setShowDeleteWordModal(true);
+  };
+
+  const confirmDeleteWord = () => {
+    if (wordToDelete) {
+      deleteQuizWord({ variables: { id: wordToDelete } });
+      setShowDeleteWordModal(false);
+      setWordToDelete(null);
     }
   };
 
@@ -497,12 +507,7 @@ const QuizDetail = () => {
                 <h2>📝 {quiz.name}</h2>
                 <button 
                   className={styles.closeQuizBtn}
-                  onClick={() => {
-                    if (window.confirm("Quiz'den çıkmak istediğinize emin misiniz? İlerlemeniz kaybolacak.")) {
-                      setShowQuizModal(false);
-                      setQuizStarted(false);
-                    }
-                  }}
+                  onClick={() => setShowExitConfirmModal(true)}
                 >
                   ✕
                 </button>
@@ -791,6 +796,71 @@ orange - portakal</pre>
               </Button>
             </div>
           </form>
+        </div>
+      </Modal>
+
+      {/* Exit Confirmation Modal */}
+      <Modal open={showExitConfirmModal} setOpen={setShowExitConfirmModal}>
+        <div className={styles.modalContent}>
+          <div className={styles.confirmModalHeader}>
+            <div className={styles.confirmIcon}>⚠️</div>
+            <h2>Quiz'den Çıkmak İstediğinize Emin Misiniz?</h2>
+          </div>
+          <p className={styles.confirmMessage}>
+            Quiz'den çıkarsanız ilerlemeniz kaybolacak ve puanınız kaydedilmeyecek.
+          </p>
+          <div className={styles.modalActions}>
+            <Button
+              type="button"
+              onClick={() => setShowExitConfirmModal(false)}
+              style={{ background: "#6c757d" }}
+            >
+              ❌ Hayır, Devam Et
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setShowExitConfirmModal(false);
+                setShowQuizModal(false);
+                setQuizStarted(false);
+              }}
+              style={{ background: "#dc3545" }}
+            >
+              ✓ Evet, Çık
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Word Confirmation Modal */}
+      <Modal open={showDeleteWordModal} setOpen={setShowDeleteWordModal}>
+        <div className={styles.modalContent}>
+          <div className={styles.confirmModalHeader}>
+            <div className={styles.confirmIcon}>🗑️</div>
+            <h2>Kelimeyi Silmek İstediğinize Emin Misiniz?</h2>
+          </div>
+          <p className={styles.confirmMessage}>
+            Bu işlem geri alınamaz.
+          </p>
+          <div className={styles.modalActions}>
+            <Button
+              type="button"
+              onClick={() => {
+                setShowDeleteWordModal(false);
+                setWordToDelete(null);
+              }}
+              style={{ background: "#6c757d" }}
+            >
+              İptal
+            </Button>
+            <Button
+              type="button"
+              onClick={confirmDeleteWord}
+              style={{ background: "#dc3545" }}
+            >
+              Evet, Sil
+            </Button>
+          </div>
         </div>
       </Modal>
 
