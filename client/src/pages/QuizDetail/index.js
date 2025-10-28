@@ -23,12 +23,21 @@ const QuizDetail = () => {
   const [showQuizTypeModal, setShowQuizTypeModal] = useState(false);
   const [showBulkImportModal, setShowBulkImportModal] = useState(false);
   const [bulkText, setBulkText] = useState("");
+  const [selectedQuestionCount, setSelectedQuestionCount] = useState(null); // Seçilen soru sayısı
   
   // Quiz karışık sorular ve yanlış cevaplar için yeni state'ler
   const [shuffledWords, setShuffledWords] = useState([]);
   const [wrongAnswers, setWrongAnswers] = useState([]);
   const [questionQueue, setQuestionQueue] = useState([]);
   const [totalQuestions, setTotalQuestions] = useState(0);
+
+  // Yeni interaktif özellikler için state'ler
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [answerHistory, setAnswerHistory] = useState([]);
+  const [startTime, setStartTime] = useState(null);
+  const [endTime, setEndTime] = useState(null);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState(null);
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const GET_QUIZ = gql`
     query getQuiz($id: ID!) {
@@ -69,27 +78,27 @@ const QuizDetail = () => {
   const [createQuizWord] = useMutation(CREATE_QUIZ_WORD, {
     refetchQueries: [{ query: GET_QUIZ, variables: { id } }],
     onCompleted: () => {
-      toast.success("Word added successfully!");
+      toast.success("✅ Kelime başarıyla eklendi!");
       setShowAddWordModal(false);
     },
     onError: (error) => {
-      toast.error("Failed to add word: " + error.message);
+      toast.error("❌ Kelime eklenemedi: " + error.message);
     },
   });
 
   const [deleteQuizWord] = useMutation(DELETE_QUIZ_WORD, {
     refetchQueries: [{ query: GET_QUIZ, variables: { id } }],
     onCompleted: () => {
-      toast.success("Word deleted successfully!");
+      toast.success("✅ Kelime başarıyla silindi!");
     },
     onError: (error) => {
-      toast.error("Failed to delete word: " + error.message);
+      toast.error("❌ Kelime silinemedi: " + error.message);
     },
   });
 
   if (loading) return <LoadingScreen fullscreen={true} />;
-  if (error) return <p>Error loading quiz :(</p>;
-  if (!data.quiz) return <p>Quiz not found</p>;
+  if (error) return <p>Quiz yüklenirken hata oluştu :(</p>;
+  if (!data.quiz) return <p>Quiz bulunamadı</p>;
 
   const { quiz } = data;
 
@@ -113,7 +122,7 @@ const QuizDetail = () => {
   };
 
   const handleDeleteWord = (wordId) => {
-    if (window.confirm("Are you sure you want to delete this word?")) {
+    if (window.confirm("Bu kelimeyi silmek istediğinizden emin misiniz?")) {
       deleteQuizWord({ variables: { id: wordId } });
     }
   };
@@ -121,7 +130,7 @@ const QuizDetail = () => {
   const handleBulkImport = (e) => {
     e.preventDefault();
     if (!bulkText.trim()) {
-      toast.error("Please enter some words!");
+      toast.error("Lütfen kelime girin!");
       return;
     }
 
@@ -160,7 +169,7 @@ const QuizDetail = () => {
     });
 
     if (words.length === 0) {
-      toast.error("No valid words found! Use format: 'word,definition' or 'word - definition'");
+      toast.error("Geçerli kelime bulunamadı! Format: 'kelime,tanım' veya 'kelime - tanım'");
       return;
     }
 
@@ -178,7 +187,7 @@ const QuizDetail = () => {
       }).then(() => {
         completed++;
         if (completed === words.length) {
-          toast.success(`Successfully added ${words.length} words!`);
+          toast.success(`✅ ${words.length} kelime başarıyla eklendi!`);
           setBulkText("");
           setShowBulkImportModal(false);
         }
@@ -186,7 +195,7 @@ const QuizDetail = () => {
         errorCount++;
         if (completed + errorCount === words.length) {
           if (errorCount > 0) {
-            toast.warning(`Added ${words.length - errorCount} words, ${errorCount} failed`);
+            toast.warning(`⚠️ ${words.length - errorCount} kelime eklendi, ${errorCount} başarısız oldu`);
           }
           setBulkText("");
           setShowBulkImportModal(false);
@@ -206,22 +215,27 @@ const QuizDetail = () => {
   };
 
   // Quiz başlatma fonksiyonu - karışık sorular
-  const startQuiz = () => {
+  const startQuiz = (questionCount = null) => {
     if (quiz.words.length === 0) {
-      toast.error("Add some words to the quiz first!");
+      toast.error("Önce quiz'e kelime ekleyin!");
       return;
     }
     if (quizType === "multiple" && quiz.words.length < 4) {
-      toast.error("Quiz needs at least 4 words for multiple choice!");
+      toast.error("Çoktan seçmeli quiz için en az 4 kelime gerekli!");
       return;
     }
     
     // Kelimeleri karıştır
     const shuffled = shuffleArray(quiz.words);
-    setShuffledWords(shuffled);
-    setQuestionQueue([...shuffled]);
+    
+    // Soru sayısını belirle
+    const finalQuestionCount = questionCount || selectedQuestionCount || shuffled.length;
+    const selectedWords = shuffled.slice(0, Math.min(finalQuestionCount, shuffled.length));
+    
+    setShuffledWords(selectedWords);
+    setQuestionQueue([...selectedWords]);
     setWrongAnswers([]);
-    setTotalQuestions(shuffled.length);
+    setTotalQuestions(selectedWords.length);
     
     setQuizStarted(true);
     setShowQuizModal(true);
@@ -229,13 +243,21 @@ const QuizDetail = () => {
     setScore(0);
     setUserAnswer("");
     setShowAnswer(false);
+    setQuizCompleted(false);
+    setAnswerHistory([]);
+    setStartTime(Date.now());
+    setEndTime(null);
+    setIsAnswerCorrect(null);
+    setSelectedOption(null);
   };
 
   const showQuizTypeSelection = () => {
     if (quiz.words.length === 0) {
-      toast.error("Add some words to the quiz first!");
+      toast.error("Önce quiz'e kelime ekleyin!");
       return;
     }
+    // Varsayılan olarak tüm kelimeleri seç
+    setSelectedQuestionCount(quiz.words.length);
     setShowQuizTypeModal(true);
   };
 
@@ -286,7 +308,7 @@ const QuizDetail = () => {
     // String kontrolü ve güvenli karşılaştırma
     if (!answerToCheck || typeof answerToCheck !== 'string') {
       console.error("Invalid answer:", answerToCheck);
-      toast.error("Please enter an answer!");
+      toast.error("Lütfen bir cevap girin!");
       return;
     }
     
@@ -296,11 +318,23 @@ const QuizDetail = () => {
     
     console.log("Comparison:", { normalizedUserAnswer, normalizedCorrectAnswer, isCorrect });
     
+    // Cevap geçmişine ekle
+    setAnswerHistory(prev => [...prev, {
+      word: currentWord.word,
+      definition: currentWord.definition,
+      userAnswer: answerToCheck,
+      isCorrect: isCorrect,
+      questionNumber: currentWordIndex + 1
+    }]);
+    
+    setIsAnswerCorrect(isCorrect);
+    setSelectedOption(answerToCheck);
+    
     if (isCorrect) {
       setScore(prevScore => prevScore + 1);
-      toast.success("Correct!");
+      toast.success("✅ Doğru cevap!");
     } else {
-      toast.error(`Wrong! The answer is: ${currentWord.word}`);
+      toast.error(`❌ Yanlış! Doğru cevap: ${currentWord.word}`);
       // Yanlış cevaplanan kelimeyi yanlış cevaplar listesine ekle
       setWrongAnswers(prev => [...prev, currentWord]);
     }
@@ -309,6 +343,10 @@ const QuizDetail = () => {
   };
 
   const nextQuestion = () => {
+    // State'leri sıfırla
+    setIsAnswerCorrect(null);
+    setSelectedOption(null);
+    
     if (currentWordIndex < questionQueue.length - 1) {
       setCurrentWordIndex(currentWordIndex + 1);
       setUserAnswer("");
@@ -331,14 +369,26 @@ const QuizDetail = () => {
         setUserAnswer("");
         setShowAnswer(false);
         
-        toast.info(`First round completed! Now reviewing ${wrongAnswers.length} words you got wrong...`);
+        toast.info(`İlk tur tamamlandı! Şimdi yanlış yaptığınız ${wrongAnswers.length} kelimeyi tekrar ediyoruz...`);
       } else {
         // Quiz tamamen bitti
-        setShowQuizModal(false);
-        setQuizStarted(false);
-        toast.success(`Quiz completed! Your score: ${score}/${totalQuestions}`);
+        setEndTime(Date.now());
+        setQuizCompleted(true);
       }
     }
+  };
+  
+  const restartQuiz = () => {
+    setQuizCompleted(false);
+    setShowQuizModal(false);
+    setQuizStarted(false);
+  };
+  
+  const formatTime = (milliseconds) => {
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   const currentWord = questionQueue[currentWordIndex];
@@ -349,21 +399,21 @@ const QuizDetail = () => {
         <h1>{quiz.name}</h1>
         <div className={styles.actions}>
           <Button onClick={() => setShowAddWordModal(true)}>
-            + Add Word
+            ➕ Kelime Ekle
           </Button>
           <Button onClick={() => setShowBulkImportModal(true)}>
-            📥 Bulk Import
+            📥 Toplu İçe Aktar
           </Button>
           <Button onClick={showQuizTypeSelection} disabled={quiz.words.length === 0}>
-            Start Quiz
+            🎯 Quiz Başlat
           </Button>
         </div>
       </div>
 
       <div className={styles.wordsList}>
-        <h2>Words ({quiz.words.length})</h2>
+        <h2>Kelimeler ({quiz.words.length})</h2>
         {quiz.words.length === 0 ? (
-          <p className={styles.emptyState}>No words yet. Add some words to start!</p>
+          <p className={styles.emptyState}>Henüz kelime yok. Başlamak için kelime ekleyin!</p>
         ) : (
           <div className={styles.wordsGrid}>
             {quiz.words.map((word) => (
@@ -375,6 +425,7 @@ const QuizDetail = () => {
                 <button
                   className={styles.deleteBtn}
                   onClick={() => handleDeleteWord(word.id)}
+                  title="Kelimeyi sil"
                 >
                   🗑️
                 </button>
@@ -387,20 +438,20 @@ const QuizDetail = () => {
       {/* Add Word Modal */}
       <Modal open={showAddWordModal} setOpen={setShowAddWordModal}>
         <div className={styles.modalContent}>
-          <h2>Add New Word</h2>
+          <h2>➕ Yeni Kelime Ekle</h2>
           <form onSubmit={handleAddWord}>
             <TextInput
-              label="Word"
+              label="Kelime"
               value={newWord}
               onChange={(e) => setNewWord(e.target.value)}
-              placeholder="Enter the word..."
+              placeholder="Kelimeyi girin..."
               required
             />
             <TextInput
-              label="Definition"
+              label="Tanım"
               value={newDefinition}
               onChange={(e) => setNewDefinition(e.target.value)}
-              placeholder="Enter the definition..."
+              placeholder="Tanımı girin..."
               required
             />
             <div className={styles.modalActions}>
@@ -409,9 +460,9 @@ const QuizDetail = () => {
                 onClick={() => setShowAddWordModal(false)}
                 style={{ background: "#6c757d" }}
               >
-                Cancel
+                İptal
               </Button>
-              <Button type="submit">Add Word</Button>
+              <Button type="submit">Kelime Ekle</Button>
             </div>
           </form>
         </div>
@@ -420,18 +471,54 @@ const QuizDetail = () => {
       {/* Quiz Modal */}
       <Modal open={showQuizModal} setOpen={setShowQuizModal} fullscreen={true}>
         <div className={styles.quizModalContent}>
-          <h2>Quiz: {quiz.name}</h2>
+          {!quizCompleted ? (
+            <>
+              <div className={styles.quizHeader}>
+                <h2>📝 {quiz.name}</h2>
+                <button 
+                  className={styles.closeQuizBtn}
+                  onClick={() => {
+                    if (window.confirm("Quiz'den çıkmak istediğinize emin misiniz? İlerlemeniz kaybolacak.")) {
+                      setShowQuizModal(false);
+                      setQuizStarted(false);
+                    }
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Progress Bar */}
+              <div className={styles.progressBarContainer}>
+                <div 
+                  className={styles.progressBar}
+                  style={{ width: `${((currentWordIndex) / questionQueue.length) * 100}%` }}
+                />
+              </div>
+
           <div className={styles.quizProgress}>
-            Question {currentWordIndex + 1} of {questionQueue.length}
-            <div className={styles.score}>Score: {score}</div>
+                <div className={styles.progressInfo}>
+                  <span className={styles.questionNumber}>
+                    Soru {currentWordIndex + 1} / {questionQueue.length}
+                  </span>
+                  <span className={styles.score}>
+                    🎯 Skor: {score}/{totalQuestions}
+                  </span>
+                </div>
             {wrongAnswers.length > 0 && (
-              <div className={styles.wrongAnswers}>Review: {wrongAnswers.length} words</div>
+                  <div className={styles.wrongAnswersInfo}>
+                    ⚠️ Tekrar edilecek: {wrongAnswers.length} kelime
+                  </div>
             )}
           </div>
           
           <div className={styles.quizQuestion}>
-            <h3>What is the word for:</h3>
-            <p className={styles.definition}>{currentWord?.definition}</p>
+                <h3>Bu tanımın karşılığı nedir?</h3>
+                <p className={styles.definition}>
+                  <span className={styles.quoteIcon}>"</span>
+                  {currentWord?.definition}
+                  <span className={styles.quoteIcon}>"</span>
+                </p>
             
             {!showAnswer ? (
               <div className={styles.answerInput}>
@@ -439,19 +526,29 @@ const QuizDetail = () => {
                   <>
                     <div className={styles.quizInputContainer}>
                       <TextInput
-                        label="Your Answer"
+                            label="Cevabınız"
                         value={userAnswer}
                         onChange={(e) => setUserAnswer(e.target.value)}
-                        placeholder="Type your answer..."
+                            placeholder="Cevabınızı yazın..."
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter' && userAnswer.trim()) {
+                                checkAnswer();
+                              }
+                            }}
+                            autoFocus
                       />
                     </div>
-                    <Button onClick={() => checkAnswer()} disabled={!userAnswer.trim()}>
-                      Check Answer
+                        <Button 
+                          onClick={() => checkAnswer()} 
+                          disabled={!userAnswer.trim()}
+                          style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}
+                        >
+                          ✓ Cevabı Kontrol Et
                     </Button>
                   </>
                 ) : (
                   <div className={styles.multipleChoice}>
-                    <h4>Choose the correct answer:</h4>
+                        <h4>Doğru cevabı seçin:</h4>
                     <div className={styles.optionsGrid}>
                       {(() => {
                         console.log("Rendering multiple choice for word:", currentWord?.word);
@@ -460,8 +557,15 @@ const QuizDetail = () => {
                         return options.map((option, index) => (
                           <button
                             key={index}
-                            className={styles.optionButton}
+                                className={`${styles.optionButton} ${
+                                  selectedOption === option 
+                                    ? isAnswerCorrect 
+                                      ? styles.correctOption 
+                                      : styles.wrongOption
+                                    : ''
+                                }`}
                             onClick={() => checkAnswer(option)}
+                                disabled={showAnswer}
                           >
                             {option}
                           </button>
@@ -472,35 +576,148 @@ const QuizDetail = () => {
                 )}
               </div>
             ) : (
-              <div className={styles.answerResult}>
+                  <div className={`${styles.answerResult} ${isAnswerCorrect ? styles.correctResult : styles.wrongResult}`}>
+                    <div className={styles.resultIcon}>
+                      {isAnswerCorrect ? '✅' : '❌'}
+                    </div>
+                    <p className={styles.resultMessage}>
+                      {isAnswerCorrect ? 'Harika! Doğru cevap!' : 'Yanlış cevap!'}
+                    </p>
                 <p className={styles.correctAnswer}>
-                  Correct answer: <strong>{currentWord?.word}</strong>
-                </p>
-                <Button onClick={nextQuestion}>
-                  {currentWordIndex < questionQueue.length - 1 ? "Next Question" : "Finish Quiz"}
+                      Doğru cevap: <strong>{currentWord?.word}</strong>
+                    </p>
+                    <Button 
+                      onClick={nextQuestion}
+                      style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}
+                    >
+                      {currentWordIndex < questionQueue.length - 1 ? '▶ Sonraki Soru' : '🏁 Quiz\'i Bitir'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            // Quiz Tamamlandı - Sonuç Ekranı
+            <div className={styles.resultsScreen}>
+              <div className={styles.resultsHeader}>
+                <div className={styles.resultsIcon}>
+                  {(score / totalQuestions) >= 0.8 ? '🏆' : 
+                   (score / totalQuestions) >= 0.6 ? '🎉' : 
+                   (score / totalQuestions) >= 0.4 ? '👍' : '📚'}
+                </div>
+                <h2>Quiz Tamamlandı!</h2>
+              </div>
+
+              <div className={styles.resultsStats}>
+                <div className={styles.statCard}>
+                  <div className={styles.statValue}>{score}</div>
+                  <div className={styles.statLabel}>Doğru Cevap</div>
+                </div>
+                <div className={styles.statCard}>
+                  <div className={styles.statValue}>{totalQuestions - score}</div>
+                  <div className={styles.statLabel}>Yanlış Cevap</div>
+                </div>
+                <div className={styles.statCard}>
+                  <div className={styles.statValue}>
+                    {Math.round((score / totalQuestions) * 100)}%
+                  </div>
+                  <div className={styles.statLabel}>Başarı Oranı</div>
+                </div>
+                <div className={styles.statCard}>
+                  <div className={styles.statValue}>
+                    {formatTime(endTime - startTime)}
+                  </div>
+                  <div className={styles.statLabel}>Süre</div>
+                </div>
+              </div>
+
+              <div className={styles.performanceMessage}>
+                {(score / totalQuestions) >= 0.8 ? (
+                  <p>🌟 Mükemmel! Harika bir performans sergiledi!</p>
+                ) : (score / totalQuestions) >= 0.6 ? (
+                  <p>🎯 İyi iş çıkardınız! Biraz daha pratikle mükemmel olacaksınız.</p>
+                ) : (score / totalQuestions) >= 0.4 ? (
+                  <p>💪 Fena değil! Daha fazla pratik yaparsanız çok daha iyi olacaksınız.</p>
+                ) : (
+                  <p>📖 Daha fazla çalışmaya ihtiyacınız var. Tekrar deneyin!</p>
+                )}
+              </div>
+
+              {/* Cevap Geçmişi */}
+              <div className={styles.answerHistorySection}>
+                <h3>📋 Cevap Detayları</h3>
+                <div className={styles.answerHistoryList}>
+                  {answerHistory.map((answer, index) => (
+                    <div 
+                      key={index} 
+                      className={`${styles.historyItem} ${answer.isCorrect ? styles.historyCorrect : styles.historyWrong}`}
+                    >
+                      <div className={styles.historyIcon}>
+                        {answer.isCorrect ? '✅' : '❌'}
+                      </div>
+                      <div className={styles.historyContent}>
+                        <div className={styles.historyQuestion}>
+                          <strong>Soru {answer.questionNumber}:</strong> {answer.definition}
+                        </div>
+                        <div className={styles.historyAnswer}>
+                          {!answer.isCorrect && (
+                            <span className={styles.userWrongAnswer}>
+                              Sizin cevabınız: "{answer.userAnswer}"
+                            </span>
+                          )}
+                          <span className={styles.correctAnswerLabel}>
+                            Doğru cevap: <strong>{answer.word}</strong>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.resultsActions}>
+                <Button 
+                  onClick={restartQuiz}
+                  style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}
+                >
+                  🏠 Ana Sayfaya Dön
+                </Button>
+                <Button 
+                  onClick={() => {
+                    setQuizCompleted(false);
+                    setShowQuizModal(false);
+                    setQuizStarted(false);
+                    setSelectedQuestionCount(quiz.words.length);
+                    setTimeout(() => {
+                      setShowQuizTypeModal(true);
+                    }, 100);
+                  }}
+                  style={{ padding: '1rem 2rem', fontSize: '1.1rem' }}
+                >
+                  🔄 Tekrar Dene
                 </Button>
               </div>
+              </div>
             )}
-          </div>
         </div>
       </Modal>
 
       {/* Bulk Import Modal */}
       <Modal open={showBulkImportModal} setOpen={setShowBulkImportModal}>
         <div className={styles.modalContent}>
-          <h2>📥 Bulk Import Words</h2>
+          <h2>📥 Toplu Kelime İçe Aktarma</h2>
           <p className={styles.importInstructions}>
-            Add multiple words at once using one of these formats:
+            Aşağıdaki formatlardan birini kullanarak birden fazla kelime ekleyin:
           </p>
           <div className={styles.formatExamples}>
             <div className={styles.example}>
-              <strong>CSV Format:</strong>
+              <strong>CSV Formatı:</strong>
               <pre>apple,elma
 banana,muz
 orange,portakal</pre>
             </div>
             <div className={styles.example}>
-              <strong>Dash Format:</strong>
+              <strong>Tire Formatı:</strong>
               <pre>apple - elma
 banana - muz
 orange - portakal</pre>
@@ -511,7 +728,7 @@ orange - portakal</pre>
               className={styles.bulkTextarea}
               value={bulkText}
               onChange={(e) => setBulkText(e.target.value)}
-              placeholder="Enter words here...&#10;&#10;Example:&#10;apple,elma&#10;banana,muz&#10;orange,portakal"
+              placeholder="Kelimeleri buraya girin...&#10;&#10;Örnek:&#10;apple,elma&#10;banana,muz&#10;orange,portakal"
               rows={10}
               required
             />
@@ -521,10 +738,10 @@ orange - portakal</pre>
                 onClick={() => setShowBulkImportModal(false)}
                 style={{ backgroundColor: '#6c757d' }}
               >
-                Cancel
+                İptal
               </Button>
               <Button type="submit" disabled={!bulkText.trim()}>
-                Import Words
+                Kelimeleri İçe Aktar
               </Button>
             </div>
           </form>
@@ -534,30 +751,77 @@ orange - portakal</pre>
       {/* Quiz Type Selection Modal */}
       <Modal open={showQuizTypeModal} setOpen={setShowQuizTypeModal}>
         <div className={styles.modalContent}>
-          <h2>Choose Quiz Type</h2>
+          <h2>🎯 Quiz Ayarları</h2>
+          
+          {/* Quiz Type Selection */}
+          <div className={styles.settingSection}>
+            <h3>Quiz Türü</h3>
           <div className={styles.quizTypeOptions}>
             <div 
-              className={styles.quizTypeCard}
-              onClick={() => {
-                setQuizType("text");
-                setShowQuizTypeModal(false);
-                startQuiz();
-              }}
-            >
-              <h3>Text Input Quiz</h3>
-              <p>Type the answer for each definition</p>
+                className={`${styles.quizTypeCard} ${quizType === "text" ? styles.selectedCard : ''}`}
+                onClick={() => setQuizType("text")}
+              >
+                <div className={styles.cardIcon}>✍️</div>
+                <h4>Yazarak Cevapla</h4>
+                <p>Cevabı klavyeden yazın</p>
+              </div>
+              <div 
+                className={`${styles.quizTypeCard} ${quizType === "multiple" ? styles.selectedCard : ''}`}
+                onClick={() => setQuizType("multiple")}
+              >
+                <div className={styles.cardIcon}>☑️</div>
+                <h4>Çoktan Seçmeli</h4>
+                <p>4 seçenekten birini seçin</p>
+              </div>
             </div>
-            <div 
-              className={styles.quizTypeCard}
-              onClick={() => {
-                setQuizType("multiple");
-                setShowQuizTypeModal(false);
-                startQuiz();
-              }}
-            >
-              <h3>Multiple Choice Quiz</h3>
-              <p>Choose from 4 options for each definition</p>
+          </div>
+
+          {/* Question Count Selection */}
+          <div className={styles.settingSection}>
+            <h3>Soru Sayısı <span className={styles.totalWords}>(Toplam: {quiz.words.length} kelime)</span></h3>
+            <div className={styles.questionCountOptions}>
+              {[5, 10, 15, 20, 25, 30].map((count) => 
+                count <= quiz.words.length ? (
+                  <button
+                    key={count}
+                    className={`${styles.countButton} ${selectedQuestionCount === count ? styles.selectedCount : ''}`}
+                    onClick={() => setSelectedQuestionCount(count)}
+                  >
+                    {count}
+                  </button>
+                ) : null
+              )}
+              <button
+                className={`${styles.countButton} ${selectedQuestionCount === quiz.words.length ? styles.selectedCount : ''}`}
+                onClick={() => setSelectedQuestionCount(quiz.words.length)}
+              >
+                Tümü ({quiz.words.length})
+              </button>
             </div>
+          </div>
+
+          {/* Start Quiz Button */}
+          <div className={styles.modalActions}>
+            <Button
+              type="button"
+              onClick={() => {
+                setShowQuizTypeModal(false);
+                setSelectedQuestionCount(null);
+              }}
+              style={{ background: "#6c757d" }}
+            >
+              İptal
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setShowQuizTypeModal(false);
+                startQuiz(selectedQuestionCount);
+              }}
+              disabled={!selectedQuestionCount}
+            >
+              Quiz'i Başlat
+            </Button>
           </div>
         </div>
       </Modal>
