@@ -19,7 +19,7 @@ const SignUp = () => {
 
   return (
     <div className={styles.layout}>
-      <div style={{ position: "absolute", top: "1rem", left: "1rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+      <div className={styles.topBar}>
         <Link to="/" className={styles.homeButton}>
           ← {t("home")}
         </Link>
