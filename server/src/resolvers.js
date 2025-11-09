@@ -21,6 +21,71 @@ const getCookieOptions = () => {
   return options;
 };
 
+// Default örnek deck ve quiz oluşturma fonksiyonu
+const createDefaultExamples = async (userId) => {
+  try {
+    // Örnek Deck oluştur
+    const exampleDeck = await prisma.deck.create({
+      data: {
+        name: "Örnek Deck - İngilizce Kelimeler",
+        userId: userId,
+      },
+    });
+
+    // Örnek Deck'e flashcard'lar ekle
+    const exampleFlashcards = [
+      { front: "Hello", back: "Merhaba" },
+      { front: "Goodbye", back: "Hoşça kal" },
+      { front: "Thank you", back: "Teşekkür ederim" },
+      { front: "Please", back: "Lütfen" },
+      { front: "Yes", back: "Evet" },
+    ];
+
+    for (const flashcard of exampleFlashcards) {
+      await prisma.flashcard.create({
+        data: {
+          front: flashcard.front,
+          back: flashcard.back,
+          deckId: exampleDeck.id,
+          userId: userId,
+          new: true,
+        },
+      });
+    }
+
+    // Örnek Quiz oluştur
+    const exampleQuiz = await prisma.quiz.create({
+      data: {
+        name: "Örnek Quiz - Temel Kelimeler",
+        userId: userId,
+      },
+    });
+
+    // Örnek Quiz'e kelimeler ekle
+    const exampleWords = [
+      { word: "Apple", definition: "Elma" },
+      { word: "Book", definition: "Kitap" },
+      { word: "Cat", definition: "Kedi" },
+      { word: "Dog", definition: "Köpek" },
+    ];
+
+    for (const word of exampleWords) {
+      await prisma.quizWord.create({
+        data: {
+          word: word.word,
+          definition: word.definition,
+          quizId: exampleQuiz.id,
+        },
+      });
+    }
+
+    console.log(`✅ Default examples created for user ${userId}`);
+  } catch (error) {
+    console.error("Error creating default examples:", error);
+    // Hata olsa bile kullanıcı oluşturma işlemi devam etsin
+  }
+};
+
 const resolvers = {
   Query: {
     logout: (parent, args, context) => {
@@ -156,6 +221,10 @@ const resolvers = {
           password: hashedPassword,
         },
       });
+      
+      // Yeni kullanıcı için örnek deck ve quiz oluştur
+      await createDefaultExamples(user.id);
+      
       // Since id is added by prisma it is unavailable when creating a user.
       const userWithToken = {
         ...user,
@@ -244,6 +313,9 @@ const resolvers = {
               provider: "google",
             },
           });
+          
+          // Yeni kullanıcı için örnek deck ve quiz oluştur
+          await createDefaultExamples(user.id);
         } else {
           // Mevcut kullanıcıyı güncelle (Google ID yoksa ekle)
           if (!user.googleId) {
