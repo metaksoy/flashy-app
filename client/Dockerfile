@@ -7,6 +7,9 @@ ENV PATH /app/node_modules/.bin:$PATH
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
+ARG REACT_APP_GOOGLE_CLIENT_ID
+ENV REACT_APP_GOOGLE_CLIENT_ID=$REACT_APP_GOOGLE_CLIENT_ID
+
 COPY package.json ./
 COPY yarn.lock ./
 RUN apk add --no-cache python3 make g++ && yarn install
