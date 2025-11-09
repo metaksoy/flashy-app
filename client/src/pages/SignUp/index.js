@@ -1,5 +1,6 @@
 import styles from "./SignUp.module.css";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import TextInput from "../../common/components/TextInput";
 import Button from "../../common/components/Button";
 import { useSignUp } from "../../common/hooks/useSignUp";
@@ -15,6 +16,9 @@ const SignUp = () => {
 
   return (
     <div className={styles.layout}>
+      <Link to="/" className={styles.homeButton}>
+        ← Ana Sayfa
+      </Link>
       <form
         className={styles.form}
         onSubmit={() => {

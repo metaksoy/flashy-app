@@ -76,7 +76,7 @@ const Profile = () => {
         <div className={styles.detailRow}>
           <span className={styles.label}>Üye Olma Tarihi:</span>
           <span className={styles.value}>
-            {user.createdAt ? new Date(user.createdAt).toLocaleDateString("tr-TR") : "Bilinmiyor"}
+            {user.created_at ? new Date(user.created_at).toLocaleDateString("tr-TR") : "Bilinmiyor"}
           </span>
         </div>
         <div className={styles.detailRow}>

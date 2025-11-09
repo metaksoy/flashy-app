@@ -15,6 +15,7 @@ import SignUp from "./pages/SignUp";
 import Quiz from "./pages/Quiz";
 import QuizDetail from "./pages/QuizDetail";
 import Profile from "./pages/Profile";
+import HowItWorks from "./pages/HowItWorks";
 import { useState } from "react";
 import Navbar from "./modules/Navbar";
 
@@ -60,6 +61,7 @@ export default function Home() {
           <Route path="/" element={<Landing />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
         </Routes>
       )}
     </div>

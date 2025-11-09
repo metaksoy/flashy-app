@@ -6,6 +6,9 @@ const Landing = () => {
   return (
     <div className={styles.layout}>
       <div className={styles.header}>
+        <Link to="/how-it-works" className={styles.link}>
+          Nasıl Çalışır?
+        </Link>
         <Link to="/signin" className={styles.link}>
           sign in
         </Link>{" "}

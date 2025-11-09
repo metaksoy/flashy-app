@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  align-items: center;
   z-index: 100;
   background-color: var(--bg-color);
   border-bottom: var(--border-thiner);
@@ -13,13 +14,48 @@
   height: 3.5em;
 }
 
+.navbarRight {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .sidebarToggle {
   align-self: center;
   height: 2em;
+  cursor: pointer;
 }
 
 .logo {
   width: 8em;
+}
+
+.profileButton {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.profileAvatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border-color, #e0e0e0);
+}
+
+.profileAvatarPlaceholder {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border: 2px solid var(--border-color, #e0e0e0);
 }
 
 /* Web görünümünde navbar gizli */
