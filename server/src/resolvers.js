@@ -363,6 +363,26 @@ const resolvers = {
       });
       return deck;
     },
+    updateDeck: async (parent, { id, name }, context, info) => {
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
+      // Kullanıcının deck'ine ait olduğunu kontrol et
+      const deck = await prisma.deck.findFirst({
+        where: {
+          id: id,
+          userId: context.userId,
+        },
+      });
+      if (!deck) {
+        throw new GraphQLError("Deck bulunamadı veya bu deck size ait değil", {
+          extensions: { code: "DECK_NOT_FOUND" },
+        });
+      }
+      const updatedDeck = await prisma.deck.update({
+        where: { id },
+        data: { name },
+      });
+      return updatedDeck;
+    },
     createFlashcard: async (parent, { data }, context, info) => {
       if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       const flashcard = await prisma.flashcard.create({
@@ -424,6 +444,29 @@ const resolvers = {
       });
       return quiz;
     },
+    updateQuiz: async (parent, { id, name }, context, info) => {
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
+      // Kullanıcının quiz'ine ait olduğunu kontrol et
+      const quiz = await prisma.quiz.findFirst({
+        where: {
+          id: id,
+          userId: context.userId,
+        },
+      });
+      if (!quiz) {
+        throw new GraphQLError("Quiz bulunamadı veya bu quiz size ait değil", {
+          extensions: { code: "QUIZ_NOT_FOUND" },
+        });
+      }
+      const updatedQuiz = await prisma.quiz.update({
+        where: { id },
+        data: { name },
+        include: {
+          words: true,
+        },
+      });
+      return updatedQuiz;
+    },
     deleteQuiz: async (parent, { id }, context, info) => {
       if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
       // delete all quiz words first
@@ -440,6 +483,18 @@ const resolvers = {
     },
     createQuizWord: async (parent, { data }, context, info) => {
       if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
+      // Quiz'in kullanıcıya ait olduğunu kontrol et
+      const quiz = await prisma.quiz.findFirst({
+        where: {
+          id: data.quizId,
+          userId: context.userId,
+        },
+      });
+      if (!quiz) {
+        throw new GraphQLError("Quiz bulunamadı veya bu quiz size ait değil", {
+          extensions: { code: "QUIZ_NOT_FOUND" },
+        });
+      }
       const quizWord = await prisma.quizWord.create({
         data: {
           word: data.word,
@@ -449,10 +504,81 @@ const resolvers = {
       });
       return quizWord;
     },
+    updateQuizWord: async (parent, { id, word, definition }, context, info) => {
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
+      // QuizWord'ün kullanıcıya ait quiz'ine ait olduğunu kontrol et
+      const quizWord = await prisma.quizWord.findFirst({
+        where: { id },
+        include: {
+          quiz: true,
+        },
+      });
+      if (!quizWord || quizWord.quiz.userId !== context.userId) {
+        throw new GraphQLError("Quiz kelimesi bulunamadı veya bu kelime size ait değil", {
+          extensions: { code: "QUIZ_WORD_NOT_FOUND" },
+        });
+      }
+      const updateData = {};
+      if (word !== undefined) updateData.word = word;
+      if (definition !== undefined) updateData.definition = definition;
+      const updatedQuizWord = await prisma.quizWord.update({
+        where: { id },
+        data: updateData,
+      });
+      return updatedQuizWord;
+    },
     deleteQuizWord: async (parent, { id }, context, info) => {
       if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
-      const quizWord = await prisma.quizWord.delete({
+      // QuizWord'ün kullanıcıya ait quiz'ine ait olduğunu kontrol et
+      const quizWord = await prisma.quizWord.findFirst({
         where: { id },
+        include: {
+          quiz: true,
+        },
+      });
+      if (!quizWord || quizWord.quiz.userId !== context.userId) {
+        throw new GraphQLError("Quiz kelimesi bulunamadı veya bu kelime size ait değil", {
+          extensions: { code: "QUIZ_WORD_NOT_FOUND" },
+        });
+      }
+      const deletedQuizWord = await prisma.quizWord.delete({
+        where: { id },
+      });
+      return deletedQuizWord;
+    },
+    addFlashcardToQuiz: async (parent, { flashcardId, quizId }, context, info) => {
+      if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });
+      // Flashcard'ın kullanıcıya ait olduğunu kontrol et
+      const flashcard = await prisma.flashcard.findFirst({
+        where: {
+          id: flashcardId,
+          userId: context.userId,
+        },
+      });
+      if (!flashcard) {
+        throw new GraphQLError("Flashcard bulunamadı veya bu flashcard size ait değil", {
+          extensions: { code: "FLASHCARD_NOT_FOUND" },
+        });
+      }
+      // Quiz'in kullanıcıya ait olduğunu kontrol et
+      const quiz = await prisma.quiz.findFirst({
+        where: {
+          id: quizId,
+          userId: context.userId,
+        },
+      });
+      if (!quiz) {
+        throw new GraphQLError("Quiz bulunamadı veya bu quiz size ait değil", {
+          extensions: { code: "QUIZ_NOT_FOUND" },
+        });
+      }
+      // Flashcard'dan kelime ve tanımı al, quiz'e ekle
+      const quizWord = await prisma.quizWord.create({
+        data: {
+          word: flashcard.front || "",
+          definition: flashcard.back || "",
+          quizId: quizId,
+        },
       });
       return quizWord;
     },

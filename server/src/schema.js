@@ -69,14 +69,18 @@ const typeDefs = gql`
     loginUser(email: String!, password: String!): String!
     googleLogin(idToken: String!): String!
     createDeck(name: String!): Deck!
+    updateDeck(id: ID!, name: String!): Deck!
     createFlashcard(data: CreateFlashcardInput): Flashcard!
     updateFlashcard(data: UpdateFlashcardInput): Flashcard!
     deleteFlashcard(id: ID!): Flashcard!
     deleteDeck(id: ID!): Deck!
     createQuiz(name: String!): Quiz!
+    updateQuiz(id: ID!, name: String!): Quiz!
     deleteQuiz(id: ID!): Quiz!
     createQuizWord(data: CreateQuizWordInput!): QuizWord!
+    updateQuizWord(id: ID!, word: String, definition: String): QuizWord!
     deleteQuizWord(id: ID!): QuizWord!
+    addFlashcardToQuiz(flashcardId: ID!, quizId: ID!): QuizWord!
   }
 
   input UpdateFlashcardInput {
@@ -101,6 +105,12 @@ const typeDefs = gql`
     word: String!
     definition: String!
     quizId: String!
+  }
+
+  input UpdateQuizWordInput {
+    id: ID!
+    word: String
+    definition: String
   }
 `;
 

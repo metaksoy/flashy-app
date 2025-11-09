@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router";
-import { gql, useQuery } from "@apollo/client";
+import { gql, useQuery, useMutation } from "@apollo/client";
 import styles from "./Deck.module.css";
 import { toast } from "react-toastify";
 import Card from "../../common/components/Card";
@@ -10,9 +10,13 @@ import LoadingScreen from "../../common/components/LoadingScreen";
 import EditCardModal from "./EditCardModal";
 import { useState } from "react";
 import RetentionBadge from "./RetentionBadge";
+import Modal from "../../common/components/Modal";
+import TextInput from "../../common/components/TextInput";
 
 const Deck = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditDeckNameModalOpen, setIsEditDeckNameModalOpen] = useState(false);
+  const [editDeckName, setEditDeckName] = useState("");
   const [editFlashcard, setEditFlashcard] = useState({
     front: "",
     back: "",
@@ -20,9 +24,11 @@ const Deck = () => {
   });
   const navigate = useNavigate();
   const params = useParams();
+  
   const GET_DECK = gql`
     query getDeck($deckId: ID!) {
       deck(id: $deckId) {
+        id
         name
         flashcards {
           front
@@ -36,6 +42,19 @@ const Deck = () => {
       }
     }
   `;
+
+  const UPDATE_DECK = gql`
+    mutation updateDeck($id: ID!, $name: String!) {
+      updateDeck(id: $id, name: $name) {
+        id
+        name
+      }
+    }
+  `;
+
+  const [updateDeck] = useMutation(UPDATE_DECK, {
+    refetchQueries: [{ query: GET_DECK, variables: { deckId: params.id } }],
+  });
 
   const { data, loading } = useQuery(GET_DECK, {
     variables: { deckId: params.id },
@@ -66,9 +85,63 @@ const Deck = () => {
           setOpen={setIsModalOpen}
           deckId={params.id}
         />
+        <Modal open={isEditDeckNameModalOpen} setOpen={setIsEditDeckNameModalOpen}>
+          <div style={{ padding: "2rem" }}>
+            <h2 style={{ marginBottom: "1.5rem", color: "#333" }}>
+              Deck İsmini Düzenle
+            </h2>
+            <TextInput 
+              label="Deck İsmi"
+              value={editDeckName} 
+              onChange={(e) => setEditDeckName(e.target.value)}
+              placeholder="Deck ismini girin..."
+              required
+            />
+            <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
+              <Button
+                type="button"
+                onClick={() => {
+                  setIsEditDeckNameModalOpen(false);
+                  setEditDeckName("");
+                }}
+                style={{ background: "#6c757d" }}
+              >
+                İptal
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (editDeckName.trim()) {
+                    try {
+                      await updateDeck({
+                        variables: { id: data.deck.id, name: editDeckName.trim() },
+                      });
+                      toast.success("Deck ismi güncellendi");
+                      setIsEditDeckNameModalOpen(false);
+                      setEditDeckName("");
+                    } catch (error) {
+                      toast.error("Deck ismi güncellenirken bir hata oluştu");
+                    }
+                  }
+                }}
+                disabled={!editDeckName.trim()}
+              >
+                Kaydet
+              </Button>
+            </div>
+          </div>
+        </Modal>
         <div className={styles.menu}>
           <h1 className={styles.title}>
-            {data.deck.name}
+            <span 
+              onClick={() => {
+                setEditDeckName(data.deck.name);
+                setIsEditDeckNameModalOpen(true);
+              }}
+              style={{ cursor: "pointer", textDecoration: "underline" }}
+              title="İsmi düzenlemek için tıklayın"
+            >
+              {data.deck.name}
+            </span>
             {deckRetention > 0 ? (
               <RetentionBadge retention={deckRetention}>
                 {" "}

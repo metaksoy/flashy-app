@@ -76,7 +76,44 @@ const Profile = () => {
         <div className={styles.detailRow}>
           <span className={styles.label}>Üye Olma Tarihi:</span>
           <span className={styles.value}>
-            {user.createdAt ? new Date(user.createdAt).toLocaleDateString("tr-TR") : "Bilinmiyor"}
+            {user.createdAt ? (() => {
+              try {
+                // PostgreSQL timestamp formatını parse et: "2025-10-09 15:43:06.150 +0300"
+                // Önce timezone offset'i kaldırıp ISO formatına çevir
+                let dateStr = user.createdAt;
+                // Eğer +0300 gibi bir offset varsa, onu ISO formatına çevir
+                if (dateStr.includes('+') || dateStr.includes('-')) {
+                  // Son boşluktan sonraki kısmı al (timezone offset)
+                  const parts = dateStr.split(' ');
+                  if (parts.length >= 2) {
+                    const timezoneOffset = parts[parts.length - 1];
+                    const dateTime = parts.slice(0, -1).join(' ');
+                    // +0300 formatını +03:00 formatına çevir
+                    if (timezoneOffset.match(/^[+-]\d{4}$/)) {
+                      const sign = timezoneOffset[0];
+                      const hours = timezoneOffset.substring(1, 3);
+                      const minutes = timezoneOffset.substring(3, 5);
+                      dateStr = `${dateTime}${sign}${hours}:${minutes}`;
+                    } else {
+                      dateStr = dateTime;
+                    }
+                  }
+                }
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) {
+                  // Eğer hala parse edilemezse, sadece tarih kısmını göster
+                  return user.createdAt.split(' ')[0];
+                }
+                return date.toLocaleDateString("tr-TR", {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                });
+              } catch (e) {
+                // Hata durumunda sadece tarih kısmını göster
+                return user.createdAt.split(' ')[0];
+              }
+            })() : "Bilinmiyor"}
           </span>
         </div>
         <div className={styles.detailRow}>

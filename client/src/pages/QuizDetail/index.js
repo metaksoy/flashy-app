@@ -27,6 +27,11 @@ const QuizDetail = () => {
   const [showExitConfirmModal, setShowExitConfirmModal] = useState(false); // Quiz'den çıkış onayı
   const [wordToDelete, setWordToDelete] = useState(null);
   const [showDeleteWordModal, setShowDeleteWordModal] = useState(false);
+  const [showEditQuizNameModal, setShowEditQuizNameModal] = useState(false);
+  const [editQuizName, setEditQuizName] = useState("");
+  const [showEditWordModal, setShowEditWordModal] = useState(false);
+  const [editWord, setEditWord] = useState({ id: "", word: "", definition: "" });
+  const [showAddFlashcardModal, setShowAddFlashcardModal] = useState(false);
   
   // Quiz karışık sorular ve yanlış cevaplar için yeni state'ler
   const [shuffledWords, setShuffledWords] = useState([]);
@@ -74,8 +79,81 @@ const QuizDetail = () => {
     }
   `;
 
+  const UPDATE_QUIZ = gql`
+    mutation updateQuiz($id: ID!, $name: String!) {
+      updateQuiz(id: $id, name: $name) {
+        id
+        name
+      }
+    }
+  `;
+
+  const UPDATE_QUIZ_WORD = gql`
+    mutation updateQuizWord($id: ID!, $word: String, $definition: String) {
+      updateQuizWord(id: $id, word: $word, definition: $definition) {
+        id
+        word
+        definition
+      }
+    }
+  `;
+
+  const ADD_FLASHCARD_TO_QUIZ = gql`
+    mutation addFlashcardToQuiz($flashcardId: ID!, $quizId: ID!) {
+      addFlashcardToQuiz(flashcardId: $flashcardId, quizId: $quizId) {
+        id
+        word
+        definition
+      }
+    }
+  `;
+
+  const GET_USER_FLASHCARDS = gql`
+    query getUserFlashcards {
+      user {
+        decks {
+          id
+          name
+          flashcards {
+            id
+            front
+            back
+          }
+        }
+      }
+    }
+  `;
+
   const { data, loading, error } = useQuery(GET_QUIZ, {
     variables: { id },
+  });
+
+  const { data: flashcardsData } = useQuery(GET_USER_FLASHCARDS);
+
+  const [updateQuiz] = useMutation(UPDATE_QUIZ, {
+    refetchQueries: [{ query: GET_QUIZ, variables: { id } }],
+    onCompleted: () => {
+      toast.success("Quiz ismi güncellendi");
+      setShowEditQuizNameModal(false);
+      setEditQuizName("");
+    },
+  });
+
+  const [updateQuizWord] = useMutation(UPDATE_QUIZ_WORD, {
+    refetchQueries: [{ query: GET_QUIZ, variables: { id } }],
+    onCompleted: () => {
+      toast.success("Kelime güncellendi");
+      setShowEditWordModal(false);
+      setEditWord({ id: "", word: "", definition: "" });
+    },
+  });
+
+  const [addFlashcardToQuiz] = useMutation(ADD_FLASHCARD_TO_QUIZ, {
+    refetchQueries: [{ query: GET_QUIZ, variables: { id } }],
+    onCompleted: () => {
+      toast.success("Flashcard quiz'e eklendi");
+      setShowAddFlashcardModal(false);
+    },
   });
 
   // Her soru değişiminde focus'u temizle
@@ -425,11 +503,186 @@ const QuizDetail = () => {
 
   return (
     <div className={styles.container}>
+      {/* Edit Quiz Name Modal */}
+      <Modal open={showEditQuizNameModal} setOpen={setShowEditQuizNameModal}>
+        <div className={styles.modalContent}>
+          <h2>Quiz İsmini Düzenle</h2>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (editQuizName.trim()) {
+              updateQuiz({ variables: { id: quiz.id, name: editQuizName.trim() } });
+            }
+          }}>
+            <TextInput
+              label="Quiz İsmi"
+              value={editQuizName}
+              onChange={(e) => setEditQuizName(e.target.value)}
+              placeholder="Quiz ismini girin..."
+              required
+            />
+            <div className={styles.modalActions}>
+              <Button
+                type="button"
+                onClick={() => {
+                  setShowEditQuizNameModal(false);
+                  setEditQuizName("");
+                }}
+                style={{ background: "#6c757d" }}
+              >
+                İptal
+              </Button>
+              <Button type="submit" disabled={!editQuizName.trim()}>
+                Kaydet
+              </Button>
+            </div>
+          </form>
+        </div>
+      </Modal>
+
+      {/* Edit Word Modal */}
+      <Modal open={showEditWordModal} setOpen={setShowEditWordModal}>
+        <div className={styles.modalContent}>
+          <h2>Kelimeyi Düzenle</h2>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            if (editWord.word.trim() && editWord.definition.trim()) {
+              updateQuizWord({
+                variables: {
+                  id: editWord.id,
+                  word: editWord.word.trim(),
+                  definition: editWord.definition.trim(),
+                },
+              });
+            }
+          }}>
+            <TextInput
+              label="Kelime"
+              value={editWord.word}
+              onChange={(e) => setEditWord({ ...editWord, word: e.target.value })}
+              placeholder="Kelimeyi girin..."
+              required
+            />
+            <TextInput
+              label="Tanım"
+              value={editWord.definition}
+              onChange={(e) => setEditWord({ ...editWord, definition: e.target.value })}
+              placeholder="Tanımı girin..."
+              required
+            />
+            <div className={styles.modalActions}>
+              <Button
+                type="button"
+                onClick={() => {
+                  setShowEditWordModal(false);
+                  setEditWord({ id: "", word: "", definition: "" });
+                }}
+                style={{ background: "#6c757d" }}
+              >
+                İptal
+              </Button>
+              <Button type="submit" disabled={!editWord.word.trim() || !editWord.definition.trim()}>
+                Kaydet
+              </Button>
+            </div>
+          </form>
+        </div>
+      </Modal>
+
+      {/* Add Flashcard to Quiz Modal */}
+      <Modal open={showAddFlashcardModal} setOpen={setShowAddFlashcardModal}>
+        <div className={styles.modalContent}>
+          <h2>Flashcard'dan Kelime Ekle</h2>
+          {flashcardsData?.user?.decks?.length === 0 ? (
+            <p>Henüz flashcard yok. Önce bir deck oluşturun ve flashcard ekleyin.</p>
+          ) : (
+            <div style={{ maxHeight: "400px", overflowY: "auto" }}>
+              {flashcardsData?.user?.decks?.map((deck) => (
+                deck.flashcards?.length > 0 && (
+                  <div key={deck.id} style={{ marginBottom: "1.5rem" }}>
+                    <h3 style={{ marginBottom: "0.5rem", color: "#333" }}>{deck.name}</h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                      {deck.flashcards.map((flashcard) => (
+                        <div
+                          key={flashcard.id}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            padding: "0.75rem",
+                            border: "1px solid #ddd",
+                            borderRadius: "0.25rem",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            addFlashcardToQuiz({
+                              variables: {
+                                flashcardId: flashcard.id,
+                                quizId: id,
+                              },
+                            });
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#f5f5f5";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "white";
+                          }}
+                        >
+                          <div>
+                            <strong>{flashcard.front}</strong> - {flashcard.back}
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              addFlashcardToQuiz({
+                                variables: {
+                                  flashcardId: flashcard.id,
+                                  quizId: id,
+                                },
+                              });
+                            }}
+                            style={{ padding: "0.25rem 0.75rem", fontSize: "0.875rem" }}
+                          >
+                            Ekle
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
+          <div className={styles.modalActions} style={{ marginTop: "1rem" }}>
+            <Button
+              type="button"
+              onClick={() => setShowAddFlashcardModal(false)}
+              style={{ background: "#6c757d" }}
+            >
+              Kapat
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       <div className={styles.header}>
-        <h1>{quiz.name}</h1>
+        <h1
+          onClick={() => {
+            setEditQuizName(quiz.name);
+            setShowEditQuizNameModal(true);
+          }}
+          style={{ cursor: "pointer", textDecoration: "underline" }}
+          title="İsmi düzenlemek için tıklayın"
+        >
+          {quiz.name}
+        </h1>
         <div className={styles.actions}>
           <Button onClick={() => setShowAddWordModal(true)}>
             ➕ Kelime Ekle
+          </Button>
+          <Button onClick={() => setShowAddFlashcardModal(true)}>
+            📚 Flashcard'dan Ekle
           </Button>
           <Button onClick={() => setShowBulkImportModal(true)}>
             📥 Toplu İçe Aktar
@@ -448,17 +701,38 @@ const QuizDetail = () => {
           <div className={styles.wordsGrid}>
             {quiz.words.map((word) => (
               <div key={word.id} className={styles.wordCard}>
-                <div className={styles.wordContent}>
+                <div 
+                  className={styles.wordContent}
+                  onClick={() => {
+                    setEditWord({ id: word.id, word: word.word, definition: word.definition });
+                    setShowEditWordModal(true);
+                  }}
+                  style={{ cursor: "pointer" }}
+                  title="Düzenlemek için tıklayın"
+                >
                   <h3>{word.word}</h3>
                   <p>{word.definition}</p>
                 </div>
-                <button
-                  className={styles.deleteBtn}
-                  onClick={() => handleDeleteWord(word.id)}
-                  title="Kelimeyi sil"
-                >
-                  🗑️
-                </button>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => {
+                      setEditWord({ id: word.id, word: word.word, definition: word.definition });
+                      setShowEditWordModal(true);
+                    }}
+                    title="Kelimeyi düzenle"
+                    style={{ background: "#4285F4", color: "white", border: "none" }}
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    className={styles.deleteBtn}
+                    onClick={() => handleDeleteWord(word.id)}
+                    title="Kelimeyi sil"
+                  >
+                    🗑️
+                  </button>
+                </div>
               </div>
             ))}
           </div>
