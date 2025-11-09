@@ -8,7 +8,7 @@ const Landing = () => {
       <div className={styles.header}>
         <Link to="/how-it-works" className={styles.link}>
           Nasıl Çalışır?
-        </Link>
+        </Link>{"  "}
         <Link to="/signin" className={styles.link}>
           sign in
         </Link>{" "}
