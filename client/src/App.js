@@ -14,6 +14,7 @@ import DeckLearnNew from "./pages/Deck/DeckLearnNew";
 import SignUp from "./pages/SignUp";
 import Quiz from "./pages/Quiz";
 import QuizDetail from "./pages/QuizDetail";
+import Profile from "./pages/Profile";
 import { useState } from "react";
 import Navbar from "./modules/Navbar";
 
@@ -43,6 +44,7 @@ export default function Home() {
           <div className="main">
             <Routes>
               <Route index path="/" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
               <Route path="/deck/:id" element={<Deck />} />
               <Route path="/deck/:id/new" element={<DeckLearnNew />} />
               <Route path="/deck/:id/due" element={<DeckPracticeDue />} />

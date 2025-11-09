@@ -1,0 +1,144 @@
+.profile {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid var(--border-color, #e0e0e0);
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--border-color, #e0e0e0);
+}
+
+.avatarPlaceholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  font-weight: bold;
+  color: white;
+  border: 3px solid var(--border-color, #e0e0e0);
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.name {
+  font-size: 2rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color, #333);
+}
+
+.email {
+  font-size: 1.1rem;
+  color: var(--text-secondary, #666);
+  margin: 0 0 0.5rem 0;
+}
+
+.providerBadge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #4285F4;
+  color: white;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.statCard {
+  background: var(--card-background, #fff);
+  border: var(--border-thick);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.statCard h3 {
+  font-size: 2.5rem;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color, #333);
+}
+
+.statCard p {
+  margin: 0;
+  color: var(--text-secondary, #666);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profileDetails {
+  background: var(--card-background, #fff);
+  border: var(--border-thick);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border-color, #e0e0e0);
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-weight: 500;
+  color: var(--text-secondary, #666);
+}
+
+.value {
+  color: var(--text-color, #333);
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .profileHeader {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .detailRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+

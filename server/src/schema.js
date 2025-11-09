@@ -29,6 +29,8 @@ const typeDefs = gql`
     password: String
     email: String
     name: String
+    avatar: String
+    provider: String
     createdAt: String
     decks: [Deck]
     flashcards: [Flashcard]

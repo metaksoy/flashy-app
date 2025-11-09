@@ -21,9 +21,9 @@ export const useGoogleLogin = () => {
       // Cookie set edildi, şimdi sayfayı yenileyerek isAuthenticated query'sinin tekrar çalışmasını sağla
       await client.resetStore();
       
-      // Hard redirect yaparak sayfanın tamamen yenilenmesini sağla
+      // Hard redirect yaparak profil sayfasına yönlendir
       // Bu sayede isAuthenticated query'si cookie'yi okuyabilir
-      window.location.href = "/";
+      window.location.href = "/profile";
       
     } catch (error) {
       console.error("Google login error:", error);
