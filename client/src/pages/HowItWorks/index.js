@@ -1,34 +1,37 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "../../contexts/LanguageContext";
+import LanguageSelector from "../../common/components/LanguageSelector";
 import styles from "./HowItWorks.module.css";
 
 const HowItWorks = () => {
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
     {
-      title: "1. Deck Oluştur",
-      description: "Öğrenmek istediğin konular için deck'ler oluştur. Her deck bir konu başlığıdır.",
+      title: t("step1Title"),
+      description: t("step1Desc"),
       icon: "📚",
     },
     {
-      title: "2. Flashcard Ekle",
-      description: "Deck'ine flashcard'lar ekle. Her flashcard'ın ön yüzünde soru, arka yüzünde cevap olur.",
+      title: t("step2Title"),
+      description: t("step2Desc"),
       icon: "🃏",
     },
     {
-      title: "3. Öğren",
-      description: "Yeni flashcard'ları öğren. Her flashcard'ı doğru cevapladığında bir sonraki seviyeye geçersin.",
+      title: t("step3Title"),
+      description: t("step3Desc"),
       icon: "🎓",
     },
     {
-      title: "4. Tekrar Et",
-      description: "Spaced Repetition sistemi sayesinde öğrendiklerini zamanında tekrar ederek unutmayı önle.",
+      title: t("step4Title"),
+      description: t("step4Desc"),
       icon: "🔄",
     },
     {
-      title: "5. Quiz Yap",
-      description: "Öğrendiklerini test etmek için quiz'ler oluştur ve kendini sına.",
+      title: t("step5Title"),
+      description: t("step5Desc"),
       icon: "✍️",
     },
   ];
@@ -47,12 +50,15 @@ const HowItWorks = () => {
 
   return (
     <div className={styles.container}>
-      <Link to="/" className={styles.homeButton}>
-        ← Ana Sayfa
-      </Link>
+      <div style={{ position: "absolute", top: "1rem", left: "1rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+        <Link to="/" className={styles.homeButton}>
+          ← {t("home")}
+        </Link>
+        <LanguageSelector />
+      </div>
       
       <div className={styles.content}>
-        <h1 className={styles.title}>Nasıl Çalışır?</h1>
+        <h1 className={styles.title}>{t("howItWorksTitle")}</h1>
         
         <div className={styles.slider}>
           <div className={styles.sliderContent}>
@@ -74,7 +80,7 @@ const HowItWorks = () => {
             <button
               className={styles.navButton}
               onClick={prevSlide}
-              aria-label="Önceki"
+              aria-label={t("previous")}
             >
               ←
             </button>
@@ -95,7 +101,7 @@ const HowItWorks = () => {
             <button
               className={styles.navButton}
               onClick={nextSlide}
-              aria-label="Sonraki"
+              aria-label={t("next")}
             >
               →
             </button>
@@ -103,13 +109,13 @@ const HowItWorks = () => {
         </div>
 
         <div className={styles.footer}>
-          <p>Hazırsan başlamak için giriş yap!</p>
+          <p>{t("readyToStart")}</p>
           <div className={styles.actionButtons}>
             <Link to="/signin" className={styles.signInButton}>
-              Giriş Yap
+              {t("signIn")}
             </Link>
             <Link to="/signup" className={styles.signUpButton}>
-              Üye Ol
+              {t("signUp")}
             </Link>
           </div>
         </div>

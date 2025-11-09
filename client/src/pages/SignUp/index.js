@@ -5,8 +5,11 @@ import TextInput from "../../common/components/TextInput";
 import Button from "../../common/components/Button";
 import { useSignUp } from "../../common/hooks/useSignUp";
 import GoogleLoginButton from "../../common/components/GoogleLoginButton";
+import { useTranslation } from "../../contexts/LanguageContext";
+import LanguageSelector from "../../common/components/LanguageSelector";
 
 const SignUp = () => {
+  const { t } = useTranslation();
   const signup = useSignUp();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,29 +19,32 @@ const SignUp = () => {
 
   return (
     <div className={styles.layout}>
-      <Link to="/" className={styles.homeButton}>
-        ← Ana Sayfa
-      </Link>
+      <div style={{ position: "absolute", top: "1rem", left: "1rem", display: "flex", gap: "1rem", alignItems: "center" }}>
+        <Link to="/" className={styles.homeButton}>
+          ← {t("home")}
+        </Link>
+        <LanguageSelector />
+      </div>
       <form
         className={styles.form}
         onSubmit={() => {
           signup({ email, password });
         }}
       >
-        <h1 className={styles.title}>Sign Up</h1>
+        <h1 className={styles.title}>{t("signUpTitle")}</h1>
         <TextInput 
-          label="Email"
+          label={t("email")}
           value={email} 
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email..."
+          placeholder={t("enterEmail")}
           type="email"
           required
         />
         <TextInput 
-          label="Password"
+          label={t("password")}
           value={password} 
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Enter your password..."
+          placeholder={t("enterPassword")}
           type="password"
           required
         />
@@ -50,14 +56,14 @@ const SignUp = () => {
             setPassword("");
           }}
         >
-          Sign Up
+          {t("signUpTitle")}
         </Button>
         {hasGoogleAuth && (
           <>
             <div className={styles.divider}>
-              <span>veya</span>
+              <span>{t("or")}</span>
             </div>
-            <GoogleLoginButton text="Google ile Üye Ol" />
+            <GoogleLoginButton text={t("googleSignUp")} />
           </>
         )}
       </form>

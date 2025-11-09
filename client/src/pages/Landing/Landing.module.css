@@ -25,6 +25,10 @@
   margin-top: 0.25em;
   text-align: right;
   padding-right: 2em;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1rem;
 }
 
 .link {

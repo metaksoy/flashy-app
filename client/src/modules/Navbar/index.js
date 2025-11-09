@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { gql, useQuery } from "@apollo/client";
 import logo from "../../common/logo.svg";
+import LanguageSelector from "../../common/components/LanguageSelector";
 import styles from "./Navbar.module.css";
 
 const Navbar = ({ setIsOpen, isOpen }) => {
@@ -22,6 +23,7 @@ const Navbar = ({ setIsOpen, isOpen }) => {
         <img src={logo} className={styles.logo} alt="logo" />
       </Link>
       <div className={styles.navbarRight}>
+        <LanguageSelector />
         <Link to="/profile" className={styles.profileButton}>
           {data?.user?.avatar ? (
             <img src={data.user.avatar} alt="Profile" className={styles.profileAvatar} />

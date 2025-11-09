@@ -1,5 +1,6 @@
 import { gql, useQuery } from "@apollo/client";
 import LoadingScreen from "../../common/components/LoadingScreen";
+import { useTranslation } from "../../contexts/LanguageContext";
 import styles from "./Profile.module.css";
 
 const Profile = () => {
@@ -27,10 +28,11 @@ const Profile = () => {
     }
   `;
 
+  const { t, language } = useTranslation();
   const { data, loading, error } = useQuery(GET_USER);
 
   if (loading) return <LoadingScreen fullscreen={true} />;
-  if (error) return <p>Error loading profile :(</p>;
+  if (error) return <p>{t("errorLoadingProfile")} :(</p>;
 
   const user = data.user;
   const deckCount = user.decks?.length || 0;
@@ -49,10 +51,10 @@ const Profile = () => {
           </div>
         )}
         <div className={styles.profileInfo}>
-          <h1 className={styles.name}>{user.name || "Kullanıcı"}</h1>
+          <h1 className={styles.name}>{user.name || t("user")}</h1>
           <p className={styles.email}>{user.email}</p>
           {user.provider === "google" && (
-            <span className={styles.providerBadge}>Google ile giriş</span>
+            <span className={styles.providerBadge}>{t("googleLogin")}</span>
           )}
         </div>
       </div>
@@ -60,21 +62,21 @@ const Profile = () => {
       <div className={styles.stats}>
         <div className={styles.statCard}>
           <h3>{deckCount}</h3>
-          <p>Deck</p>
+          <p>{t("decks")}</p>
         </div>
         <div className={styles.statCard}>
           <h3>{flashcardCount}</h3>
-          <p>Flashcard</p>
+          <p>{t("flashcards")}</p>
         </div>
         <div className={styles.statCard}>
           <h3>{quizCount}</h3>
-          <p>Quiz</p>
+          <p>{t("quizzes")}</p>
         </div>
       </div>
 
       <div className={styles.profileDetails}>
         <div className={styles.detailRow}>
-          <span className={styles.label}>Üye Olma Tarihi:</span>
+          <span className={styles.label}>{t("membershipDate")}</span>
           <span className={styles.value}>
             {user.createdAt ? (() => {
               try {
@@ -122,7 +124,7 @@ const Profile = () => {
                   return user.createdAt.toString();
                 }
 
-                return date.toLocaleDateString("tr-TR", {
+                return date.toLocaleDateString(language === 'tr' ? "tr-TR" : "en-US", {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric'
@@ -131,13 +133,13 @@ const Profile = () => {
                 // Hata durumunda orijinal değeri göster
                 return user.createdAt.toString();
               }
-            })() : "Bilinmiyor"}
+            })() : t("unknown")}
           </span>
         </div>
         <div className={styles.detailRow}>
-          <span className={styles.label}>Giriş Yöntemi:</span>
+          <span className={styles.label}>{t("loginMethod")}</span>
           <span className={styles.value}>
-            {user.provider === "google" ? "Google" : "Email/Şifre"}
+            {user.provider === "google" ? t("google") : t("emailPassword")}
           </span>
         </div>
       </div>

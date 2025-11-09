@@ -18,6 +18,7 @@ import Profile from "./pages/Profile";
 import HowItWorks from "./pages/HowItWorks";
 import { useState } from "react";
 import Navbar from "./modules/Navbar";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -37,33 +38,35 @@ export default function Home() {
   if (error) return <p>Error :(</p>;
 
   return (
-    <div>
-      {data.isAuthenticated ? (
-        <div className="layout">
-          <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-          <Navbar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
-          <div className="main">
-            <Routes>
-              <Route index path="/" element={<Dashboard />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/deck/:id" element={<Deck />} />
-              <Route path="/deck/:id/new" element={<DeckLearnNew />} />
-              <Route path="/deck/:id/due" element={<DeckPracticeDue />} />
-              <Route path="/new" element={<LearnNew />} />
-              <Route path="/due" element={<PracticeDue />} />
-              <Route path="/quiz" element={<Quiz />} />
-              <Route path="/quiz/:id" element={<QuizDetail />} />
-            </Routes>
+    <LanguageProvider>
+      <div>
+        {data.isAuthenticated ? (
+          <div className="layout">
+            <Sidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+            <Navbar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+            <div className="main">
+              <Routes>
+                <Route index path="/" element={<Dashboard />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/deck/:id" element={<Deck />} />
+                <Route path="/deck/:id/new" element={<DeckLearnNew />} />
+                <Route path="/deck/:id/due" element={<DeckPracticeDue />} />
+                <Route path="/new" element={<LearnNew />} />
+                <Route path="/due" element={<PracticeDue />} />
+                <Route path="/quiz" element={<Quiz />} />
+                <Route path="/quiz/:id" element={<QuizDetail />} />
+              </Routes>
+            </div>
           </div>
-        </div>
-      ) : (
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/how-it-works" element={<HowItWorks />} />
-        </Routes>
-      )}
-    </div>
+        ) : (
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route path="/how-it-works" element={<HowItWorks />} />
+          </Routes>
+        )}
+      </div>
+    </LanguageProvider>
   );
 }
