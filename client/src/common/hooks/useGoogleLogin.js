@@ -1,10 +1,8 @@
 import { useApolloClient, gql } from "@apollo/client";
-import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 
 export const useGoogleLogin = () => {
   const client = useApolloClient();
-  const navigate = useNavigate();
 
   const googleLogin = async (idToken) => {
     try {
@@ -17,10 +15,16 @@ export const useGoogleLogin = () => {
         variables: { idToken },
       });
       
-      // Başarılı giriş
+      console.log("Google login successful, token received:", data?.googleLogin ? "Yes" : "No");
+      
+      // Başarılı giriş - Store'u resetle ve sayfayı yenile
+      // Cookie set edildi, şimdi sayfayı yenileyerek isAuthenticated query'sinin tekrar çalışmasını sağla
       await client.resetStore();
-      navigate("/", { replace: true });
-      toast.success("Google ile başarıyla giriş yapıldı");
+      
+      // Hard redirect yaparak sayfanın tamamen yenilenmesini sağla
+      // Bu sayede isAuthenticated query'si cookie'yi okuyabilir
+      window.location.href = "/";
+      
     } catch (error) {
       console.error("Google login error:", error);
       if (error.graphQLErrors?.some(err => err.extensions?.code === "GOOGLE_EMAIL_MISSING")) {
@@ -28,7 +32,7 @@ export const useGoogleLogin = () => {
       } else if (error.graphQLErrors?.some(err => err.extensions?.code === "GOOGLE_LOGIN_ERROR")) {
         toast.error("Google ile giriş yapılırken bir hata oluştu");
       } else {
-        toast.error("Google ile giriş yapılırken bir hata oluştu");
+        toast.error("Google ile giriş yapılırken bir hata oluştu: " + (error.message || "Bilinmeyen hata"));
       }
     }
   };

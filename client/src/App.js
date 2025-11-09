@@ -26,7 +26,9 @@ export default function Home() {
     }
   `;
 
-  const { loading, error, data } = useQuery(IS_AUTHENTICATED);
+  const { loading, error, data } = useQuery(IS_AUTHENTICATED, {
+    fetchPolicy: "network-only", // Her seferinde server'dan kontrol et
+  });
 
   if (loading) return <LoadingScreen fullscreen={true} />;
 
