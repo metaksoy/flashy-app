@@ -24,22 +24,30 @@ const client = new ApolloClient({
 
 const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
 
+const AppWrapper = () => (
+  <ApolloProvider client={client}>
+    <BrowserRouter>
+      <App />
+      <ToastContainer
+        toastStyle={{
+          border: "2px solid #505050",
+          boxShadow: "none",
+          color: "#505050",
+        }}
+      />
+    </BrowserRouter>
+  </ApolloProvider>
+);
+
 ReactDOM.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={googleClientId}>
-      <ApolloProvider client={client}>
-        <BrowserRouter>
-          <App />
-          <ToastContainer
-            toastStyle={{
-              border: "2px solid #505050",
-              boxShadow: "none",
-              color: "#505050",
-            }}
-          />
-        </BrowserRouter>
-      </ApolloProvider>
-    </GoogleOAuthProvider>
+    {googleClientId ? (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <AppWrapper />
+      </GoogleOAuthProvider>
+    ) : (
+      <AppWrapper />
+    )}
   </React.StrictMode>,
   document.getElementById("root")
 );

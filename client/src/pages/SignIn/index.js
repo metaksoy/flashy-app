@@ -3,24 +3,15 @@ import { useState } from "react";
 import TextInput from "../../common/components/TextInput";
 import Button from "../../common/components/Button";
 import { useLogin } from "../../common/hooks/useLogin";
-import { useGoogleLogin } from "../../common/hooks/useGoogleLogin";
-import { useGoogleLogin as useGoogleOAuthLogin } from "@react-oauth/google";
+import GoogleLoginButton from "../../common/components/GoogleLoginButton";
 
 const SignIn = () => {
   const login = useLogin();
-  const googleLogin = useGoogleLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const handleGoogleOAuthLogin = useGoogleOAuthLogin({
-    onSuccess: (tokenResponse) => {
-      // tokenResponse.credential contains the ID token
-      googleLogin(tokenResponse.credential);
-    },
-    onError: () => {
-      console.error("Google login failed");
-    },
-  });
+  
+  const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
+  const hasGoogleAuth = !!googleClientId;
 
   return (
     <div className={styles.layout}>
@@ -57,19 +48,14 @@ const SignIn = () => {
         >
           Sign In
         </Button>
-        <div className={styles.divider}>
-          <span>veya</span>
-        </div>
-        <Button
-          type="button"
-          onClick={(event) => {
-            event.preventDefault();
-            handleGoogleOAuthLogin();
-          }}
-          style={{ backgroundColor: "#4285F4", color: "white" }}
-        >
-          Google ile Giriş Yap
-        </Button>
+        {hasGoogleAuth && (
+          <>
+            <div className={styles.divider}>
+              <span>veya</span>
+            </div>
+            <GoogleLoginButton text="Google ile Giriş Yap" />
+          </>
+        )}
       </form>
     </div>
   );
