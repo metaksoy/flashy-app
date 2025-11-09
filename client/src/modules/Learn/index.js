@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useApolloClient, gql, useMutation } from "@apollo/client";
 import LoadingScreen from "../../common/components/LoadingScreen";
 import FlipCard from "../../common/components/FlipCard";
+import { useTranslation } from "../../contexts/LanguageContext";
 
 const UPDATE_FLASHCARD = gql`
   mutation updateFlashcard($data: UpdateFlashcardInput) {
@@ -19,6 +20,7 @@ const UPDATE_FLASHCARD = gql`
 `;
 
 const Learn = ({ flashcards, callingQuery }) => {
+  const { t } = useTranslation();
   const client = useApolloClient();
   const [loading, setLoading] = useState(true);
 
@@ -88,7 +90,7 @@ const Learn = ({ flashcards, callingQuery }) => {
     return (
       <div className={styles.layout}>
         <div className={styles.content}>
-          <h1>You don't have any new cards to learn right now!</h1>
+          <h1>{t("noNewCards")}</h1>
         </div>
       </div>
     );
@@ -96,7 +98,7 @@ const Learn = ({ flashcards, callingQuery }) => {
     return (
       <div className={styles.layout}>
         <div className={styles.content}>
-          <h1>Learning session complete!</h1>
+          <h1>{t("learningSessionComplete")}</h1>
         </div>
       </div>
     );
@@ -105,7 +107,7 @@ const Learn = ({ flashcards, callingQuery }) => {
       <div className={styles.layout}>
         <div className={styles.header}>
           <h1>
-            Learn {currentFlashcard}/{flashcards.length}
+            {t("learn")} {currentFlashcard}/{flashcards.length}
           </h1>
           <ProgressBar
             completed={(currentFlashcard / flashcards.length) * 100}
@@ -122,7 +124,7 @@ const Learn = ({ flashcards, callingQuery }) => {
         </div>
         <div className={styles.footer}>
           <Button callback={learned}>
-            Learned <code>L</code>
+            {t("learned")} <code>L</code>
           </Button>
         </div>
       </div>

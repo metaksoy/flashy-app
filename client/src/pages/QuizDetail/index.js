@@ -6,9 +6,11 @@ import LoadingScreen from "../../common/components/LoadingScreen";
 import Button from "../../common/components/Button";
 import TextInput from "../../common/components/TextInput";
 import Modal from "../../common/components/Modal";
+import { useTranslation } from "../../contexts/LanguageContext";
 import styles from "./QuizDetail.module.css";
 
 const QuizDetail = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const [showAddWordModal, setShowAddWordModal] = useState(false);
   const [showQuizModal, setShowQuizModal] = useState(false);
@@ -506,7 +508,7 @@ const QuizDetail = () => {
       {/* Edit Quiz Name Modal */}
       <Modal open={showEditQuizNameModal} setOpen={setShowEditQuizNameModal}>
         <div className={styles.modalContent}>
-          <h2>Quiz İsmini Düzenle</h2>
+          <h2>{t("editQuizName")}</h2>
           <form onSubmit={(e) => {
             e.preventDefault();
             if (editQuizName.trim()) {
@@ -514,10 +516,10 @@ const QuizDetail = () => {
             }
           }}>
             <TextInput
-              label="Quiz İsmi"
+              label={t("quizName")}
               value={editQuizName}
               onChange={(e) => setEditQuizName(e.target.value)}
-              placeholder="Quiz ismini girin..."
+              placeholder={t("enterQuizName")}
               required
             />
             <div className={styles.modalActions}>
@@ -529,10 +531,10 @@ const QuizDetail = () => {
                 }}
                 style={{ background: "#6c757d" }}
               >
-                İptal
+                {t("cancel")}
               </Button>
               <Button type="submit" disabled={!editQuizName.trim()}>
-                Kaydet
+                {t("save")}
               </Button>
             </div>
           </form>
@@ -542,7 +544,7 @@ const QuizDetail = () => {
       {/* Edit Word Modal */}
       <Modal open={showEditWordModal} setOpen={setShowEditWordModal}>
         <div className={styles.modalContent}>
-          <h2>Kelimeyi Düzenle</h2>
+          <h2>{t("editWord")}</h2>
           <form onSubmit={(e) => {
             e.preventDefault();
             if (editWord.word.trim() && editWord.definition.trim()) {
@@ -556,17 +558,17 @@ const QuizDetail = () => {
             }
           }}>
             <TextInput
-              label="Kelime"
+              label={t("wordLabel")}
               value={editWord.word}
               onChange={(e) => setEditWord({ ...editWord, word: e.target.value })}
-              placeholder="Kelimeyi girin..."
+              placeholder={t("enterWord")}
               required
             />
             <TextInput
-              label="Tanım"
+              label={t("definitionLabel")}
               value={editWord.definition}
               onChange={(e) => setEditWord({ ...editWord, definition: e.target.value })}
-              placeholder="Tanımı girin..."
+              placeholder={t("enterDefinition")}
               required
             />
             <div className={styles.modalActions}>
@@ -578,10 +580,10 @@ const QuizDetail = () => {
                 }}
                 style={{ background: "#6c757d" }}
               >
-                İptal
+                {t("cancel")}
               </Button>
               <Button type="submit" disabled={!editWord.word.trim() || !editWord.definition.trim()}>
-                Kaydet
+                {t("save")}
               </Button>
             </div>
           </form>
@@ -591,9 +593,9 @@ const QuizDetail = () => {
       {/* Add Flashcard to Quiz Modal */}
       <Modal open={showAddFlashcardModal} setOpen={setShowAddFlashcardModal}>
         <div className={styles.modalContent}>
-          <h2>Flashcard'dan Kelime Ekle</h2>
+          <h2>{t("addWordFromFlashcard")}</h2>
           {flashcardsData?.user?.decks?.length === 0 ? (
-            <p>Henüz flashcard yok. Önce bir deck oluşturun ve flashcard ekleyin.</p>
+            <p>{t("noFlashcardsYet")}</p>
           ) : (
             <div style={{ maxHeight: "400px", overflowY: "auto" }}>
               {flashcardsData?.user?.decks?.map((deck) => (
@@ -644,7 +646,7 @@ const QuizDetail = () => {
                             }}
                             style={{ padding: "0.25rem 0.75rem", fontSize: "0.875rem" }}
                           >
-                            Ekle
+                            {t("add")}
                           </Button>
                         </div>
                       ))}
@@ -660,7 +662,7 @@ const QuizDetail = () => {
               onClick={() => setShowAddFlashcardModal(false)}
               style={{ background: "#6c757d" }}
             >
-              Kapat
+              {t("close")}
             </Button>
           </div>
         </div>
@@ -673,30 +675,30 @@ const QuizDetail = () => {
             setShowEditQuizNameModal(true);
           }}
           style={{ cursor: "pointer", textDecoration: "underline" }}
-          title="İsmi düzenlemek için tıklayın"
+          title={t("clickToEditName")}
         >
           {quiz.name}
         </h1>
         <div className={styles.actions}>
           <Button onClick={() => setShowAddWordModal(true)}>
-            ➕ Kelime Ekle
+            ➕ {t("addWord")}
           </Button>
           <Button onClick={() => setShowAddFlashcardModal(true)}>
-            📚 Flashcard'dan Ekle
+            📚 {t("addWordFromFlashcard")}
           </Button>
           <Button onClick={() => setShowBulkImportModal(true)}>
-            📥 Toplu İçe Aktar
+            📥 {t("bulkImport")}
           </Button>
           <Button onClick={showQuizTypeSelection} disabled={quiz.words.length === 0}>
-            🎯 Quiz Başlat
+            🎯 {t("startQuiz")}
           </Button>
         </div>
       </div>
 
       <div className={styles.wordsList}>
-        <h2>Kelimeler ({quiz.words.length})</h2>
+        <h2>{t("wordsLabel")} ({quiz.words.length})</h2>
         {quiz.words.length === 0 ? (
-          <p className={styles.emptyState}>Henüz kelime yok. Başlamak için kelime ekleyin!</p>
+          <p className={styles.emptyState}>{t("noWordsYet")}</p>
         ) : (
           <div className={styles.wordsGrid}>
             {quiz.words.map((word) => (
@@ -708,7 +710,7 @@ const QuizDetail = () => {
                     setShowEditWordModal(true);
                   }}
                   style={{ cursor: "pointer" }}
-                  title="Düzenlemek için tıklayın"
+                  title={t("clickToEdit")}
                 >
                   <h3>{word.word}</h3>
                   <p>{word.definition}</p>
@@ -720,7 +722,7 @@ const QuizDetail = () => {
                       setEditWord({ id: word.id, word: word.word, definition: word.definition });
                       setShowEditWordModal(true);
                     }}
-                    title="Kelimeyi düzenle"
+                    title={t("editWordTitle")}
                     style={{ background: "#4285F4", color: "white", border: "none" }}
                   >
                     ✏️
@@ -728,7 +730,7 @@ const QuizDetail = () => {
                   <button
                     className={styles.deleteBtn}
                     onClick={() => handleDeleteWord(word.id)}
-                    title="Kelimeyi sil"
+                    title={t("deleteWordTitle")}
                   >
                     🗑️
                   </button>
@@ -742,20 +744,20 @@ const QuizDetail = () => {
       {/* Add Word Modal */}
       <Modal open={showAddWordModal} setOpen={setShowAddWordModal}>
         <div className={styles.modalContent}>
-          <h2>➕ Yeni Kelime Ekle</h2>
+          <h2>➕ {t("addWord")}</h2>
           <form onSubmit={handleAddWord}>
             <TextInput
-              label="Kelime"
+              label={t("wordLabel")}
               value={newWord}
               onChange={(e) => setNewWord(e.target.value)}
-              placeholder="Kelimeyi girin..."
+              placeholder={t("enterWord")}
               required
             />
             <TextInput
-              label="Tanım"
+              label={t("definitionLabel")}
               value={newDefinition}
               onChange={(e) => setNewDefinition(e.target.value)}
-              placeholder="Tanımı girin..."
+              placeholder={t("enterDefinition")}
               required
             />
             <div className={styles.modalActions}>
@@ -764,9 +766,9 @@ const QuizDetail = () => {
                 onClick={() => setShowAddWordModal(false)}
                 style={{ background: "#6c757d" }}
               >
-                İptal
+                {t("cancel")}
               </Button>
-              <Button type="submit">Kelime Ekle</Button>
+              <Button type="submit">{t("addWord")}</Button>
             </div>
           </form>
         </div>
@@ -1030,19 +1032,19 @@ const QuizDetail = () => {
       {/* Bulk Import Modal */}
       <Modal open={showBulkImportModal} setOpen={setShowBulkImportModal}>
         <div className={styles.modalContent}>
-          <h2>📥 Toplu Kelime İçe Aktarma</h2>
+          <h2>📥 {t("bulkImportTitle")}</h2>
           <p className={styles.importInstructions}>
-            Aşağıdaki formatlardan birini kullanarak birden fazla kelime ekleyin:
+            {t("bulkImportInstructions")}
           </p>
           <div className={styles.formatExamples}>
             <div className={styles.example}>
-              <strong>CSV Formatı:</strong>
+              <strong>{t("csvFormat")}</strong>
               <pre>apple,elma
 banana,muz
 orange,portakal</pre>
             </div>
             <div className={styles.example}>
-              <strong>Tire Formatı:</strong>
+              <strong>{t("dashFormat")}</strong>
               <pre>apple - elma
 banana - muz
 orange - portakal</pre>
@@ -1053,7 +1055,7 @@ orange - portakal</pre>
               className={styles.bulkTextarea}
               value={bulkText}
               onChange={(e) => setBulkText(e.target.value)}
-              placeholder="Kelimeleri buraya girin...&#10;&#10;Örnek:&#10;apple,elma&#10;banana,muz&#10;orange,portakal"
+              placeholder={t("bulkImportPlaceholder")}
               rows={10}
               required
             />
@@ -1063,10 +1065,10 @@ orange - portakal</pre>
                 onClick={() => setShowBulkImportModal(false)}
                 style={{ backgroundColor: '#6c757d' }}
               >
-                İptal
+                {t("cancel")}
               </Button>
               <Button type="submit" disabled={!bulkText.trim()}>
-                Kelimeleri İçe Aktar
+                {t("importWords")}
               </Button>
             </div>
           </form>

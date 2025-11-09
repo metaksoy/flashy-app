@@ -4,8 +4,10 @@ import { toast } from "react-toastify";
 import Modal from "../../common/components/Modal";
 import TextInput from "../../common/components/TextInput";
 import Button from "../../common/components/Button";
+import { useTranslation } from "../../contexts/LanguageContext";
 
 const NewQuizModal = ({ open, setOpen }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
 
   const CREATE_QUIZ = gql`
@@ -20,23 +22,19 @@ const NewQuizModal = ({ open, setOpen }) => {
   const [createQuiz, { loading }] = useMutation(CREATE_QUIZ, {
     refetchQueries: ["getUserDecks"],
     onCompleted: () => {
-      toast.success("Quiz created successfully!");
+      toast.success(t("quizCreated"));
       setOpen(false);
       setName("");
     },
     onError: (error) => {
-      toast.error("Failed to create quiz: " + error.message);
+      toast.error(t("errorOccurred") + ": " + error.message);
     },
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted, name:", name.trim());
     if (name.trim()) {
-      console.log("Calling createQuiz mutation");
       createQuiz({ variables: { name: name.trim() } });
-    } else {
-      console.log("Name is empty");
     }
   };
 
@@ -44,14 +42,14 @@ const NewQuizModal = ({ open, setOpen }) => {
     <Modal open={open} setOpen={setOpen}>
       <div style={{ padding: "2rem" }}>
         <h2 style={{ marginBottom: "1.5rem", color: "#333" }}>
-          Create New Quiz
+          {t("createQuiz")}
         </h2>
-        <form onSubmit={handleSubmit} onClick={() => console.log("Form clicked")}>
+        <form onSubmit={handleSubmit}>
           <TextInput
-            label="Quiz Name"
+            label={t("quizName")}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Enter quiz name..."
+            placeholder={t("enterQuizName")}
             required
           />
           <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
@@ -60,14 +58,13 @@ const NewQuizModal = ({ open, setOpen }) => {
               onClick={() => setOpen(false)}
               style={{ background: "#6c757d" }}
             >
-              Cancel
+              {t("cancel")}
             </Button>
             <Button 
               type="submit" 
-              disabled={loading}
-              onClick={() => console.log("Button clicked, name:", name, "trimmed:", name.trim(), "disabled:", loading || !name.trim())}
+              disabled={loading || !name.trim()}
             >
-              {loading ? "Creating..." : "Create Quiz"}
+              {loading ? t("creating") : t("createQuizButton")}
             </Button>
           </div>
         </form>

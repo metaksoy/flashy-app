@@ -5,12 +5,14 @@ import logo from "../../common/logo.svg";
 import { gql, useQuery } from "@apollo/client";
 import { Link } from "react-router-dom";
 import { useLogout } from "../../common/hooks/useLogout";
+import { useTranslation } from "../../contexts/LanguageContext";
 import NewDeckModal from "./NewDeckModal";
 import DeckLink from "./DeckLink";
 import QuizLink from "../../pages/Quiz/QuizLink";
 import NewQuizModal from "../../pages/Quiz/NewQuizModal";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
+  const { t } = useTranslation();
   const logout = useLogout();
   const GET_DECKS = gql`
     query getUserDecks {
@@ -55,7 +57,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
             />
           </svg>
-          <p>Dashboard</p>
+          <p>{t("dashboard")}</p>
         </Link>
         <Link className="icon-link" to="/due" onClick={() => setIsOpen(false)}>
           <svg
@@ -72,7 +74,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <p>Due today</p>
+          <p>{t("dueToday")}</p>
         </Link>
         <Link className="icon-link" to="/new" onClick={() => setIsOpen(false)}>
           <svg
@@ -89,7 +91,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
             />
           </svg>
-          <p>Learn new</p>
+          <p>{t("learnNew")}</p>
         </Link>
         <Link className="icon-link" to="/quiz" onClick={() => setIsOpen(false)}>
           <svg
@@ -106,7 +108,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
           </svg>
-          <p>Quiz</p>
+          <p>{t("quiz")}</p>
         </Link>
         <Link className="icon-link" to="/profile" onClick={() => setIsOpen(false)}>
           <svg
@@ -123,12 +125,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
             />
           </svg>
-          <p>Profil</p>
+          <p>{t("profile")}</p>
         </Link>
         <br></br>
         <div className="decks">
           <strong className="link new-deck">
-            <strong>Decks</strong>
+            <strong>{t("yourDecks")}</strong>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="new-deck-icon"
@@ -146,9 +148,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </svg>
           </strong>
           {loading ? (
-            <p>Loading decks...</p>
+            <p>{t("loadingDecks")}</p>
           ) : error ? (
-            <p>Couldn't load decks :(</p>
+            <p>{t("couldntLoadDecks")}</p>
           ) : (
             data.user.decks.map((deck) => (
               <span key={deck.id} onClick={() => setIsOpen(false)}>
@@ -159,7 +161,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         </div>
         <div className="decks">
           <strong className="link new-deck">
-            <strong>Quizzes</strong>
+            <strong>{t("yourQuizzes")}</strong>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="new-deck-icon"
@@ -177,9 +179,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             </svg>
           </strong>
           {loading ? (
-            <p>Loading quizzes...</p>
+            <p>{t("loadingQuizzes")}</p>
           ) : error ? (
-            <p>Couldn't load quizzes :(</p>
+            <p>{t("couldntLoadQuizzes")}</p>
           ) : (
             data.user.quizzes.map((quiz) => (
               <span key={quiz.id} onClick={() => setIsOpen(false)}>
@@ -190,7 +192,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         </div>
       </div>
       <a className="link" onClick={logout}>
-        log out
+        {t("logOut")}
       </a>
     </div>
   );

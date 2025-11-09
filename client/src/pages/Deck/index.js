@@ -12,8 +12,10 @@ import { useState } from "react";
 import RetentionBadge from "./RetentionBadge";
 import Modal from "../../common/components/Modal";
 import TextInput from "../../common/components/TextInput";
+import { useTranslation } from "../../contexts/LanguageContext";
 
 const Deck = () => {
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditDeckNameModalOpen, setIsEditDeckNameModalOpen] = useState(false);
   const [editDeckName, setEditDeckName] = useState("");
@@ -88,13 +90,13 @@ const Deck = () => {
         <Modal open={isEditDeckNameModalOpen} setOpen={setIsEditDeckNameModalOpen}>
           <div style={{ padding: "2rem" }}>
             <h2 style={{ marginBottom: "1.5rem", color: "#333" }}>
-              Deck İsmini Düzenle
+              {t("editDeckName")}
             </h2>
             <TextInput 
-              label="Deck İsmi"
+              label={t("deckName")}
               value={editDeckName} 
               onChange={(e) => setEditDeckName(e.target.value)}
-              placeholder="Deck ismini girin..."
+              placeholder={t("enterDeckName")}
               required
             />
             <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
@@ -106,7 +108,7 @@ const Deck = () => {
                 }}
                 style={{ background: "#6c757d" }}
               >
-                İptal
+                {t("cancel")}
               </Button>
               <Button
                 onClick={async () => {
@@ -115,17 +117,17 @@ const Deck = () => {
                       await updateDeck({
                         variables: { id: data.deck.id, name: editDeckName.trim() },
                       });
-                      toast.success("Deck ismi güncellendi");
+                      toast.success(t("deckNameUpdated"));
                       setIsEditDeckNameModalOpen(false);
                       setEditDeckName("");
                     } catch (error) {
-                      toast.error("Deck ismi güncellenirken bir hata oluştu");
+                      toast.error(t("errorOccurred"));
                     }
                   }
                 }}
                 disabled={!editDeckName.trim()}
               >
-                Kaydet
+                {t("save")}
               </Button>
             </div>
           </div>
@@ -138,17 +140,17 @@ const Deck = () => {
                 setIsEditDeckNameModalOpen(true);
               }}
               style={{ cursor: "pointer", textDecoration: "underline" }}
-              title="İsmi düzenlemek için tıklayın"
+              title={t("clickToEditName")}
             >
               {data.deck.name}
             </span>
             {deckRetention > 0 ? (
               <RetentionBadge retention={deckRetention}>
                 {" "}
-                retention
+                {t("retention")}
               </RetentionBadge>
             ) : null}
-            <Badge>{data.deck.flashcards.length} cards</Badge>
+            <Badge>{data.deck.flashcards.length} {data.deck.flashcards.length === 1 ? t("card") : t("cards")}</Badge>
           </h1>
           <div>
             <Button
@@ -156,14 +158,14 @@ const Deck = () => {
                 navigate("new");
               }}
             >
-              Learn new <Badge style={{ fontSize: "0.7em" }}>{newCards}</Badge>
+              {t("learnNew")} <Badge style={{ fontSize: "0.7em" }}>{newCards}</Badge>
             </Button>
             <Button
               callback={() => {
                 navigate("due");
               }}
             >
-              Study due <Badge style={{ fontSize: "0.7em" }}>{dueCards}</Badge>
+              {t("studyDue")} <Badge style={{ fontSize: "0.7em" }}>{dueCards}</Badge>
             </Button>
           </div>
         </div>
@@ -188,8 +190,8 @@ const Deck = () => {
       </>
     );
   } else {
-    toast.error("Deck not found");
-    return <h1>Error :(</h1>;
+    toast.error(t("deckNotFound"));
+    return <h1>{t("error")} :(</h1>;
   }
 };
 

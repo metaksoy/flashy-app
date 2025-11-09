@@ -2,6 +2,7 @@ import styles from "./Card.module.css";
 import PropTypes from "prop-types";
 import RetentionBadge from "../../../pages/Deck/RetentionBadge";
 import Badge from "../Badge";
+import { useTranslation } from "../../../contexts/LanguageContext";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import calendar from "dayjs/plugin/calendar";
@@ -9,6 +10,7 @@ dayjs.extend(relativeTime);
 dayjs.extend(calendar);
 
 const Card = (props) => {
+  const { t } = useTranslation();
   const retention = Math.round(
     (props.flashcard.retention / props.flashcard.reviews) * 100
   );
@@ -28,7 +30,7 @@ const Card = (props) => {
           </>
         ) : (
           <Badge style={{ backgroundColor: "#39bbdb" }} fontSize="0.55em">
-            New!
+            {t("new")}
           </Badge>
         )}
       </div>
