@@ -65,6 +65,7 @@ const typeDefs = gql`
   type Mutation {
     createUser(email: String!, password: String!): String!
     loginUser(email: String!, password: String!): String!
+    googleLogin(idToken: String!): String!
     createDeck(name: String!): Deck!
     createFlashcard(data: CreateFlashcardInput): Flashcard!
     updateFlashcard(data: UpdateFlashcardInput): Flashcard!

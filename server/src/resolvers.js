@@ -2,6 +2,7 @@ const { prisma } = require("./db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { GraphQLError } = require("graphql");
+const { OAuth2Client } = require("google-auth-library");
 
 // Cookie options helper - Signin ve Logout'ta aynı ayarlar kullanılmalı
 const getCookieOptions = () => {
@@ -178,6 +179,12 @@ const resolvers = {
       if (!user) {
         throw new Error("No User Found");
       }
+      // Google ile giriş yapan kullanıcıların şifresi olmayabilir
+      if (!user.password || user.password === "") {
+        throw new GraphQLError("Bu hesap Google ile giriş yapmak için kullanılıyor. Lütfen Google ile giriş yapın.", {
+          extensions: { code: "GOOGLE_ACCOUNT" },
+        });
+      }
       const valid = await bcrypt.compare(password, user.password);
       if (!valid) {
         throw new Error("Wrong Password");
@@ -193,6 +200,86 @@ const resolvers = {
         maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
       });
       return userWithToken.token;
+    },
+    googleLogin: async (parent, { idToken }, context, info) => {
+      const { res } = context;
+      
+      try {
+        // Google OAuth client oluştur
+        const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+        
+        // Token'ı doğrula
+        const ticket = await client.verifyIdToken({
+          idToken: idToken,
+          audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        
+        const payload = ticket.getPayload();
+        const { sub: googleId, email, name, picture } = payload;
+        
+        if (!email) {
+          throw new GraphQLError("Google hesabınızdan email bilgisi alınamadı", {
+            extensions: { code: "GOOGLE_EMAIL_MISSING" },
+          });
+        }
+        
+        // Kullanıcıyı bul veya oluştur
+        let user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { googleId: googleId },
+              { email: email },
+            ],
+          },
+        });
+        
+        if (!user) {
+          // Yeni kullanıcı oluştur
+          user = await prisma.user.create({
+            data: {
+              email: email,
+              googleId: googleId,
+              name: name || "",
+              avatar: picture || "",
+              provider: "google",
+            },
+          });
+        } else {
+          // Mevcut kullanıcıyı güncelle (Google ID yoksa ekle)
+          if (!user.googleId) {
+            user = await prisma.user.update({
+              where: { id: user.id },
+              data: {
+                googleId: googleId,
+                provider: "google",
+                name: name || user.name || "",
+                avatar: picture || user.avatar || "",
+              },
+            });
+          }
+        }
+        
+        // JWT token oluştur
+        const token = jwt.sign({ userId: user.id }, process.env.TOKEN_SECRET, {
+          expiresIn: process.env.TOKEN_EXPIRY,
+        });
+        
+        // Cookie'ye token'ı kaydet
+        res.cookie("token", token, {
+          ...getCookieOptions(),
+          maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+        });
+        
+        return token;
+      } catch (error) {
+        console.error("Google login error:", error);
+        if (error instanceof GraphQLError) {
+          throw error;
+        }
+        throw new GraphQLError("Google ile giriş yapılırken bir hata oluştu", {
+          extensions: { code: "GOOGLE_LOGIN_ERROR" },
+        });
+      }
     },
     createDeck: async (parent, { name }, context, info) => {
       if (!context.userId) throw new GraphQLError("Not authenticated", { extensions: { code: "UNAUTHENTICATED" } });

@@ -8,6 +8,7 @@ import {
   ApolloProvider,
   createHttpLink,
 } from "@apollo/client";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -21,20 +22,24 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID || "";
+
 ReactDOM.render(
   <React.StrictMode>
-    <ApolloProvider client={client}>
-      <BrowserRouter>
-        <App />
-        <ToastContainer
-          toastStyle={{
-            border: "2px solid #505050",
-            boxShadow: "none",
-            color: "#505050",
-          }}
-        />
-      </BrowserRouter>
-    </ApolloProvider>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <ApolloProvider client={client}>
+        <BrowserRouter>
+          <App />
+          <ToastContainer
+            toastStyle={{
+              border: "2px solid #505050",
+              boxShadow: "none",
+              color: "#505050",
+            }}
+          />
+        </BrowserRouter>
+      </ApolloProvider>
+    </GoogleOAuthProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );

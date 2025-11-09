@@ -19,3 +19,24 @@
   margin: 0 0 0.5em 0;
   font-size: 2em;
 }
+
+.divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin: 1em 0;
+  text-align: center;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid #ccc;
+}
+
+.divider span {
+  padding: 0 1em;
+  color: #666;
+  font-size: 0.9em;
+}
