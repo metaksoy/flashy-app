@@ -78,40 +78,58 @@ const Profile = () => {
           <span className={styles.value}>
             {user.createdAt ? (() => {
               try {
-                // PostgreSQL timestamp formatını parse et: "2025-10-09 15:43:06.150 +0300"
-                // Önce timezone offset'i kaldırıp ISO formatına çevir
-                let dateStr = user.createdAt;
-                // Eğer +0300 gibi bir offset varsa, onu ISO formatına çevir
-                if (dateStr.includes('+') || dateStr.includes('-')) {
-                  // Son boşluktan sonraki kısmı al (timezone offset)
-                  const parts = dateStr.split(' ');
-                  if (parts.length >= 2) {
-                    const timezoneOffset = parts[parts.length - 1];
-                    const dateTime = parts.slice(0, -1).join(' ');
-                    // +0300 formatını +03:00 formatına çevir
-                    if (timezoneOffset.match(/^[+-]\d{4}$/)) {
-                      const sign = timezoneOffset[0];
-                      const hours = timezoneOffset.substring(1, 3);
-                      const minutes = timezoneOffset.substring(3, 5);
-                      dateStr = `${dateTime}${sign}${hours}:${minutes}`;
-                    } else {
-                      dateStr = dateTime;
+                let date;
+                // Eğer timestamp (number) ise
+                if (typeof user.createdAt === 'number') {
+                  date = new Date(user.createdAt);
+                } 
+                // Eğer string ise
+                else if (typeof user.createdAt === 'string') {
+                  // ISO formatı (2025-01-20T12:34:56.789Z) veya PostgreSQL formatı (2025-10-09 15:43:06.150 +0300)
+                  if (user.createdAt.includes('T')) {
+                    // ISO formatı
+                    date = new Date(user.createdAt);
+                  } else {
+                    // PostgreSQL formatını parse et: "2025-10-09 15:43:06.150 +0300"
+                    let dateStr = user.createdAt;
+                    const parts = dateStr.split(' ');
+                    if (parts.length >= 2) {
+                      const timezoneOffset = parts[parts.length - 1];
+                      const dateTime = parts.slice(0, -1).join(' ');
+                      // +0300 formatını +03:00 formatına çevir
+                      if (timezoneOffset.match(/^[+-]\d{4}$/)) {
+                        const sign = timezoneOffset[0];
+                        const hours = timezoneOffset.substring(1, 3);
+                        const minutes = timezoneOffset.substring(3, 5);
+                        dateStr = `${dateTime}${sign}${hours}:${minutes}`;
+                      } else {
+                        dateStr = dateTime;
+                      }
                     }
+                    date = new Date(dateStr);
                   }
+                } 
+                // Eğer Date objesi ise (olması gerekmez ama güvenlik için)
+                else if (user.createdAt instanceof Date) {
+                  date = user.createdAt;
                 }
-                const date = new Date(dateStr);
-                if (isNaN(date.getTime())) {
-                  // Eğer hala parse edilemezse, sadece tarih kısmını göster
-                  return user.createdAt.split(' ')[0];
+                else {
+                  return user.createdAt.toString();
                 }
+
+                if (!date || isNaN(date.getTime())) {
+                  // Parse edilemezse, orijinal değeri göster
+                  return user.createdAt.toString();
+                }
+
                 return date.toLocaleDateString("tr-TR", {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric'
                 });
               } catch (e) {
-                // Hata durumunda sadece tarih kısmını göster
-                return user.createdAt.split(' ')[0];
+                // Hata durumunda orijinal değeri göster
+                return user.createdAt.toString();
               }
             })() : "Bilinmiyor"}
           </span>

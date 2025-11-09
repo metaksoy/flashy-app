@@ -583,6 +583,23 @@ const resolvers = {
       return quizWord;
     },
   },
+  User: {
+    createdAt: (parent) => {
+      // Prisma'dan gelen Date objesini ISO string formatına çevir
+      if (parent.createdAt instanceof Date) {
+        return parent.createdAt.toISOString();
+      }
+      // Eğer zaten string ise, olduğu gibi döndür
+      if (typeof parent.createdAt === 'string') {
+        return parent.createdAt;
+      }
+      // Eğer timestamp (number) ise, Date objesine çevirip ISO string'e dönüştür
+      if (typeof parent.createdAt === 'number') {
+        return new Date(parent.createdAt).toISOString();
+      }
+      return parent.createdAt;
+    },
+  },
 };
 
 module.exports = resolvers;
